@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOTAM Decoder and Route Conflict Check | FlightPlanPro</title><meta name="description" content="Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area.">
+<meta name="google-site-verification" content="JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc">
+<link rel="canonical" href="https://flightplanpro.pages.dev/tools/notam-decoder/"><meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="NOTAM Decoder and Route Conflict Check | FlightPlanPro"><meta property="og:description" content="Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area."><meta property="og:url" content="https://flightplanpro.pages.dev/tools/notam-decoder/"><meta property="og:site_name" content="FlightPlanPro">
+<meta name="twitter:card" content="summary"><meta name="theme-color" content="#0f2a3d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f2a3d'/%3E%3Cpath d='M5 24 27 8' stroke='%23e0407f' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css"><script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "NOTAM Decoder and Route Check", "url": "https://flightplanpro.pages.dev/tools/notam-decoder/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script></head><body>
+<a class="skip" href="#m">Skip to content</a>
+<header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
+<nav aria-label="Main"><a href="/flight-planner/">Flight planner</a><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
+<main id="m" class="wrap"><nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/tools/">Tools</a> / NOTAM decoder</nav>
+<h1>NOTAM Decoder and Route Check</h1><p class="lead">Paste an official ICAO-format NOTAM. See it decoded, drawn on a map, and checked against your route. Nothing you paste leaves your browser.</p>
+<section class="calc"><div><label for="nt">NOTAM text<textarea id="nt" rows="9" style="font:inherit;width:100%;padding:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px">A1234/26 NOTAMN
+Q) OPKR/QRTCA/IV/BO/W/000/150/2530N06400E040
+A) OPKR B) 2610160600 C) 2610161800
+E) TEMPORARY RESTRICTED AREA ACTIVE. MILITARY EXERCISE.
+F) SFC G) FL150</textarea></label><p class="note">Example only, not a real NOTAM. Always get NOTAMs from the official source for each country.</p></div>
+<div style="display:grid;gap:10px;align-content:start"><label>Departure (ICAO)<input id="dep" value="OPKC" maxlength="4"></label><label>Destination (ICAO)<input id="dst" value="OMDB" maxlength="4"></label><label>Cruise level (FL)<input id="fl" type="number" value="100"></label><button class="btn" id="go" style="border:0;cursor:pointer">Decode and check route</button></div></section>
+<div id="res" aria-live="polite"></div>
+<h2>How the check works</h2><p>The Q-line of an ICAO NOTAM carries the subject code, the lower and upper limits in flight levels, and a centre point with a radius in nautical miles. This tool draws that circle, then measures the closest distance between it and your great-circle route. If the route passes inside the radius and your cruise level is between the limits, it marks the route red and proposes a waypoint to go around.</p>
+<p><b>Limits.</b> It checks one NOTAM at a time, ignores the schedule field, and treats the area as a circle. Airports come from the site's airport file. Use it for training, and confirm everything with official sources.</p>
+<script>
+const $=i=>document.getElementById(i),r=Math.PI/180,R=3440.065;
+const hv=(a,b)=>{const p=a[0]*r,q=b[0]*r,l=(b[1]-a[1])*r,h=Math.sin((q-p)/2)**2+Math.cos(p)*Math.cos(q)*Math.sin(l/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const brg=(a,b)=>{const p=a[0]*r,q=b[0]*r,l=(b[1]-a[1])*r;return(Math.atan2(Math.sin(l)*Math.cos(q),Math.cos(p)*Math.sin(q)-Math.sin(p)*Math.cos(q)*Math.cos(l))/r+360)%360};
+const dst=(a,b,d)=>{const p=a[0]*r,l=a[1]*r,t=b*r,g=d/R,q=Math.asin(Math.sin(p)*Math.cos(g)+Math.cos(p)*Math.sin(g)*Math.cos(t));return[q/r,(l+Math.atan2(Math.sin(t)*Math.sin(g)*Math.cos(p),Math.cos(g)-Math.sin(p)*Math.sin(q)))/r]};
+function pts(a,b,m=120){const v=x=>[Math.cos(x[0]*r)*Math.cos(x[1]*r),Math.cos(x[0]*r)*Math.sin(x[1]*r),Math.sin(x[0]*r)],A=v(a),B=v(b),w=Math.acos(Math.min(1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])),o=[];for(let i=0;i<=m;i++){const t=i/m,s=w?Math.sin((1-t)*w)/Math.sin(w):1-t,u=w?Math.sin(t*w)/Math.sin(w):t,x=s*A[0]+u*B[0],y=s*A[1]+u*B[1],z=s*A[2]+u*B[2];o.push([Math.atan2(z,Math.hypot(x,y))/r,Math.atan2(y,x)/r])}return o}
+const near=(C,a,b)=>{let m=1e9,k=0;pts(a,b).forEach((p,i)=>{const d=hv(C,p);if(d<m){m=d;k=i}});return[m,k]};
+const SUB={RT:'Temporary restricted area',RP:'Prohibited area',RD:'Danger area',RR:'Restricted area',RA:'Airspace reservation',WP:'Parachute jumping',WE:'Military exercises',WM:'Missile, gun or rocket firing',WU:'Unmanned aircraft',WL:'Laser activity',MR:'Runway',MX:'Taxiway',FA:'Aerodrome',NV:'VOR',NB:'NDB',NM:'DME',IC:'ILS',LR:'Runway lighting',OB:'Obstacle'},CON={LC:'closed',AS:'unserviceable',CA:'activated',CH:'changed',LT:'limited',XX:'other'};
+const fd=s=>'20'+s.slice(0,2)+'-'+s.slice(2,4)+'-'+s.slice(4,6)+' '+s.slice(6,8)+':'+s.slice(8)+' UTC';
+function parse(s){const q=s.match(/Q\)\s*([A-Z]{4})\/(Q[A-Z]{4})\/([A-Z]+)\/([A-Z]+)\/([A-Z]+)\/(\d{3})\/(\d{3})\/(\d{2})(\d{2})([NS])(\d{3})(\d{2})([EW])(\d{3})/);if(!q)return null;
+const g=re=>(s.match(re)||[])[1],c=q[2];return{id:g(/^\s*([A-Z]\d{4}\/\d{2})/),fir:q[1],code:c,sub:SUB[c.slice(1,3)]||'Subject code '+c.slice(1,3),con:CON[c.slice(3)]||c.slice(3),lo:+q[6],hi:+q[7],lat:(+q[8]+q[9]/60)*(q[10]=='S'?-1:1),lon:(+q[11]+q[12]/60)*(q[13]=='W'?-1:1),rad:+q[14],loc:g(/A\)\s*([A-Z ]+?)\s*B\)/),b:g(/B\)\s*(\d{10})/),c:g(/C\)\s*(\d{10}|PERM)/),e:(g(/E\)\s*([\s\S]*?)(?=\n?\s*[FG]\)|$)/)||'').trim()}}
+let DB;const db=()=>DB||(DB=fetch('/data/airports.json').then(r=>r.ok?r.json():null).catch(()=>null));
+function row(a,b){const d=document.createElement('div');d.className='r';const l=document.createElement('span');l.textContent=a;const v=document.createElement('b');v.textContent=b;d.append(l,v);return d}
+function map(C,rad,legs,W){const circ=[];for(let b=0;b<=360;b+=10)circ.push(dst(C,b,rad));const all=circ.concat(...legs.map(l=>l.p)),la=all.map(p=>p[0]),lo=all.map(p=>p[1]),m=Math.cos((Math.min(...la)+Math.max(...la))/2*r),x0=Math.min(...lo),y1=Math.max(...la),k=Math.min(500/((Math.max(...lo)-x0)*m||1),190/((y1-Math.min(...la))||1)),X=p=>30+(p[1]-x0)*m*k,Y=p=>20+(y1-p[0])*k,L=a=>a.map(p=>X(p)+','+Y(p)).join(' ');
+return '<svg viewBox="0 0 560 230" style="width:100%;background:var(--bg);border:1px solid var(--line)" role="img" aria-label="Restricted area and route"><polygon points="'+L(circ)+'" fill="rgba(209,18,107,.25)" stroke="#d1126b" stroke-width="2"/>'+legs.map(l=>'<polyline points="'+L(l.p)+'" fill="none" stroke="'+l.c+'" stroke-width="3"'+(l.d?' stroke-dasharray="7 5"':'')+'/>').join('')+(W?'<circle cx="'+X(W)+'" cy="'+Y(W)+'" r="5" fill="#1e8c4a"/>':'')+'</svg>'}
+async function go(){const o=$('res');o.textContent='';const n=parse($('nt').value);if(!n){o.textContent='Could not read a Q-line. Paste the full ICAO NOTAM, including the line starting Q).';return}
+const box=document.createElement('div');box.className='calc';const tb=document.createElement('div');tb.className='out';
+[['NOTAM',n.id||'n/a'],['FIR',n.fir],['Subject',n.sub+', '+n.con],['Location',n.loc||n.fir],['Valid from',n.b?fd(n.b):'n/a'],['Valid to',n.c=='PERM'?'permanent':n.c?fd(n.c):'n/a'],['Levels','FL'+n.lo+' to FL'+n.hi],['Centre',n.lat.toFixed(3)+', '+n.lon.toFixed(3)],['Radius',n.rad+' NM'],['Text',n.e]].forEach(x=>tb.append(row(...x)));
+const mp=document.createElement('div');box.append(tb,mp);o.append(box);
+const D=await db(),A=D&&D[$('dep').value.trim().toUpperCase()],B=D&&D[$('dst').value.trim().toUpperCase()],C=[n.lat,n.lon];
+if(!A||!B){mp.innerHTML=map(C,n.rad,[]);const p=document.createElement('p');p.textContent='Route check needs both airports in the airport file. Check the ICAO codes, or add the airport file to the site.';o.append(p);return}
+const a=[A[2],A[3]],b=[B[2],B[3]],fl=+$('fl').value,[best,k]=near(C,a,b),inAlt=fl>=n.lo&&fl<=n.hi,hit=best<n.rad&&inAlt,legs=[{p:pts(a,b),c:hit?'#d1126b':'#1e8c4a'}];let W=null,msg;
+if(!hit){msg=best<n.rad?'Route enters the area, but FL'+fl+' is outside FL'+n.lo+' to FL'+n.hi+'. No conflict at this level.':'Route stays '+best.toFixed(0)+' NM from the centre. Clear of the '+n.rad+' NM area.'}
+else{const cp=pts(a,b)[k],base=best<1?brg(a,b)+90:brg(C,cp);for(let x=15;x<=120;x+=15){W=dst(C,base,n.rad+x);if(near(C,a,W)[0]>=n.rad&&near(C,W,b)[0]>=n.rad)break}
+const extra=hv(a,W)+hv(W,b)-hv(a,b);legs=[{p:pts(a,b),c:'#d1126b',d:1},{p:pts(a,W).concat(pts(W,b)),c:'#1e8c4a'}];
+msg='ROUTE BLOCKED: the direct route passes within '+best.toFixed(0)+' NM of the centre at FL'+fl+'. Suggested waypoint '+W[0].toFixed(3)+', '+W[1].toFixed(3)+' adds about '+extra.toFixed(0)+' NM. Check the new legs against other NOTAMs.'}
+mp.innerHTML=map(C,n.rad,legs,W);const v=document.createElement('p');v.style.cssText='padding:12px;border-left:4px solid '+(hit?'#d1126b':'#1e8c4a')+';background:var(--card)';v.textContent=msg;o.append(v)}
+$('go').onclick=go;go()
+</script>
+</main>
+<footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>

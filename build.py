@@ -1,6 +1,6 @@
 import os, json
 S = "https://flightplanpro.pages.dev"
-GSC = "PASTE_YOUR_GOOGLE_VERIFICATION_CODE"
+GSC = "JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc"
 D = "2026-10-15"
 O = "/mnt/user-data/outputs/flightplanpro"
 
@@ -22,10 +22,10 @@ def page(path, title, desc, body, ld=None):
 <link rel="stylesheet" href="/assets/style.css">{ld}</head><body>
 <a class="skip" href="#m">Skip to content</a>
 <header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
-<nav aria-label="Main"><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
+<nav aria-label="Main"><a href="/flight-planner/">Flight planner</a><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
 <main id="m" class="wrap">{body}</main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
-<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
 
 def R(*a): return "R([" + ",".join(f"['{x}',{y}]" for x, y in a) + "])"
 HM = "Math.floor(t)+' h '+f((t%1)*60)+' min'"
@@ -101,6 +101,8 @@ for t in T:
 TAGS={'crosswind-calculator': 'pilot student', 'wind-triangle-calculator': 'student pilot hobbyist', 'fuel-planning-calculator': 'dispatcher pilot', 'density-altitude-calculator': 'pilot engineer student', 'great-circle-distance-calculator': 'dispatcher engineer hobbyist', 'top-of-descent-calculator': 'pilot student'}
 LAB={'pilot': 'Pilots', 'student': 'Students', 'dispatcher': 'Dispatchers', 'engineer': 'Engineers', 'hobbyist': 'Hobbyists'}
 cards="".join('<a class="row" href="/tools/%s/" data-a="%s"><span class="n">%s</span><span class="d">%s.</span><span class="t">%s</span></a>'%(t["slug"],TAGS[t["slug"]],t["name"],t["desc"].split(".")[0],", ".join(LAB[k] for k in TAGS[t["slug"]].split())) for t in T)
+EXTRA='<a class="row" href="/tools/metar-decoder/" data-a="pilot student dispatcher hobbyist"><span class="n">METAR Decoder</span><span class="d">Read any METAR in plain English with flight category.</span><span class="t">Pilots, Students, Dispatchers, Hobbyists</span></a><a class="row" href="/tools/notam-decoder/" data-a="pilot dispatcher student"><span class="n">NOTAM Decoder and Route Check</span><span class="d">Decode a NOTAM, map the area and check your route.</span><span class="t">Pilots, Dispatchers, Students</span></a>'
+cards+=EXTRA
 CHIPS='<div class="chips" role="group" aria-label="Filter tools by role"><button aria-pressed="true" data-f="all">All</button>'+"".join('<button aria-pressed="false" data-f="%s">%s</button>'%(k,v) for k,v in LAB.items())+'</div>'
 FJS="<script>document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chips button').forEach(x=>x.setAttribute('aria-pressed',x==b));const k=b.dataset.f;document.querySelectorAll('.row').forEach(r=>r.hidden=k!='all'&&!r.dataset.a.split(' ').includes(k))})</script>"
 w("tools/index.html", page("/tools/", "Free Flight Planning Tools & Calculators | FlightPlanPro", "Free aviation calculators for pilots, students and dispatchers: crosswind, wind triangle, fuel, density altitude, great-circle and top of descent.",
@@ -159,6 +161,22 @@ form{display:grid;gap:12px}label{display:grid;gap:4px;font-weight:600;font-size:
 .links{padding-left:20px}footer{margin-top:60px;background:#0a2540;color:#b9cddb;padding:22px 0;font-size:.9rem}footer a{color:#d7e6f2}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}""")
 
+
+import os as _o
+w("functions/api/wx.js", "const OK=/^[A-Z0-9]{3,4}$/;\nexport async function onRequestGet({request,waitUntil}){\nconst u=new URL(request.url),t=u.searchParams.get('t')==='taf'?'taf':'metar';\nconst ids=(u.searchParams.get('ids')||'').toUpperCase().split(',').filter(x=>OK.test(x)).slice(0,6).sort();\nif(!ids.length)return new Response('[]',{status:400,headers:{'Content-Type':'application/json'}});\nconst key=new Request(u.origin+'/api/wx?t='+t+'&ids='+ids.join(',')),c=caches.default;\nlet r=await c.match(key);\nif(!r){\nconst up=await fetch('https://aviationweather.gov/api/data/'+t+'?format=json&ids='+ids.join(',')+(t==='metar'?'&hours=3':''),{headers:{'User-Agent':'FlightPlanPro/1.0 (https://flightplanpro.pages.dev)'}});\nconst body=up.ok?((await up.text())||'[]'):'[]';\nr=new Response(body,{status:up.ok?200:502,headers:{'Content-Type':'application/json','Cache-Control':'public, max-age='+(up.ok?300:20),'Access-Control-Allow-Origin':'*'}});\nif(up.ok)waitUntil(c.put(key,r.clone()));\n}\nreturn r}\n")
+urls.append("/flight-planner/")
+w("flight-planner/index.html", page("/flight-planner/", "Flight Plan Generator: Fuel, Load Sheet, METAR/TAF | FlightPlanPro", "Free flight plan generator: route A to B with alternate C, fuel build-up, vertical flight plan, load sheet and live METAR/TAF. For training use.", open("/home/claude/fp_body.html").read()))
+
+urls += ["/privacy/", "/data-sources/"]
+w("privacy/index.html", page("/privacy/", "Privacy Policy | FlightPlanPro", "How FlightPlanPro handles data, cookies and advertising.",
+ '<h1>Privacy policy</h1><p class="lead">Last updated 16 October 2026.</p><h2>What the calculators do with your input</h2><p>Calculator values stay in your browser. The flight planner sends only the airport codes you enter to our own server, to fetch weather.</p><h2>Logs</h2><p>Our host, Cloudflare, processes requests and may keep technical logs such as IP address and browser type for security and operation.</p><h2>Advertising and cookies</h2><p>We plan to show ads from Google AdSense. Google and its partners may use cookies to show and measure ads. Visitors in the European Economic Area, the United Kingdom and Switzerland will be asked for consent through a Google-certified consent banner. You can manage ad personalisation at adssettings.google.com.</p><h2>Analytics</h2><p>We use Google Search Console, which reports search performance for the site and does not identify individual visitors to us.</p><h2>Your rights</h2><p>You can ask what data we hold or ask us to delete it. Contact: [ADD-YOUR-CONTACT-EMAIL].</p>'))
+w("data-sources/index.html", page("/data-sources/", "Data Sources and Disclaimer | FlightPlanPro", "Where FlightPlanPro data comes from, and why its results are for training and simulation only.",
+ '<h1>Data sources and disclaimer</h1><p class="lead">FlightPlanPro is for training, education and flight simulation. It is not operational flight planning software.</p><h2>Sources</h2><ul><li><b>METAR and TAF:</b> NOAA Aviation Weather Center (aviationweather.gov), fetched through our server and cached for about five minutes.</li><li><b>Airports:</b> OurAirports (ourairports.com), public domain, updated periodically.</li><li><b>Aircraft values:</b> rounded training approximations. They are not from any aircraft flight manual.</li></ul><h2>Not included</h2><p>NOTAMs, airways, FIR data and winds aloft are not mirrored here. For NOTAMs always use the official source for the country concerned.</p><h2>Disclaimer</h2><p>Results are estimates and may be wrong. Do not use them for real flights, dispatch, load control or any safety decision. Always use current official weather, NOTAMs, approved aircraft data and applicable regulations. FlightPlanPro is not affiliated with ICAO, the FAA, EASA, NOAA or any aircraft manufacturer, and gives no warranty of any kind.</p>'))
+
+urls += ["/tools/metar-decoder/", "/tools/notam-decoder/"]
+import json as _j
+w("tools/metar-decoder/index.html", page("/tools/metar-decoder/", "METAR Decoder: Read Aviation Weather Reports | FlightPlanPro", "Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English.", open("/home/claude/metar_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"METAR Decoder","url":"https://flightplanpro.pages.dev/tools/metar-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
+w("tools/notam-decoder/index.html", page("/tools/notam-decoder/", "NOTAM Decoder and Route Conflict Check | FlightPlanPro", "Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area.", open("/home/claude/notam_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"NOTAM Decoder and Route Check","url":"https://flightplanpro.pages.dev/tools/notam-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
 w("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {S}/sitemap.xml\n")
 w("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{S}{u}</loc><lastmod>{D}</lastmod></url>\n" for u in urls) + "</urlset>\n")
 w("_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n/assets/*\n  Cache-Control: public, max-age=86400\n")

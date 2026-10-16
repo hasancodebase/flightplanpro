@@ -1,0 +1,7 @@
+// Usage: node scripts/make-airports.js <folder with airports.csv and runways.csv>
+const fs=require('fs');
+function csv(f){const t=fs.readFileSync(f,'utf8'),rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}else if(ch=='"')q=true;else if(ch==','){r.push(c);c=''}else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';if(r.length>1||r[0])rows.push(r);r=[]}else c+=ch}if(c||r.length){r.push(c);rows.push(r)}const h=rows.shift();return rows.map(x=>Object.fromEntries(h.map((k,i)=>[k,x[i]])))}
+const d=process.argv[2]||'.',rw={},out={};
+for(const r of csv(d+'/runways.csv')){const L=Math.round(parseFloat(r.length_ft));if(!L||r.closed==='1')continue;rw[r.airport_ident]=Math.max(rw[r.airport_ident]||0,L)}
+for(const r of csv(d+'/airports.csv')){const i=r.ident;if(!/^[A-Z]{4}$/.test(i))continue;if(!['large_airport','medium_airport','small_airport'].includes(r.type))continue;if(r.type==='small_airport'&&r.scheduled_service!=='yes')continue;const la=parseFloat(r.latitude_deg),lo=parseFloat(r.longitude_deg);if(isNaN(la)||isNaN(lo))continue;out[i]=[i,r.name,+la.toFixed(4),+lo.toFixed(4),Math.round(parseFloat(r.elevation_ft)||0),r.iata_code||'',rw[i]||0]}
+fs.mkdirSync('data',{recursive:true});fs.writeFileSync('data/airports.json',JSON.stringify(out));console.log(Object.keys(out).length+' airports written to data/airports.json');

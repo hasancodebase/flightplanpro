@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>METAR Decoder: Read Aviation Weather Reports | FlightPlanPro</title><meta name="description" content="Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English.">
+<meta name="google-site-verification" content="JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc">
+<link rel="canonical" href="https://flightplanpro.pages.dev/tools/metar-decoder/"><meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="METAR Decoder: Read Aviation Weather Reports | FlightPlanPro"><meta property="og:description" content="Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English."><meta property="og:url" content="https://flightplanpro.pages.dev/tools/metar-decoder/"><meta property="og:site_name" content="FlightPlanPro">
+<meta name="twitter:card" content="summary"><meta name="theme-color" content="#0f2a3d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f2a3d'/%3E%3Cpath d='M5 24 27 8' stroke='%23e0407f' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css"><script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "METAR Decoder", "url": "https://flightplanpro.pages.dev/tools/metar-decoder/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script></head><body>
+<a class="skip" href="#m">Skip to content</a>
+<header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
+<nav aria-label="Main"><a href="/flight-planner/">Flight planner</a><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
+<main id="m" class="wrap"><nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/tools/">Tools</a> / METAR decoder</nav>
+<h1>METAR Decoder</h1><p class="lead">Paste any METAR to read it in plain English, or fetch the latest report for an airport. Includes the flight category (VFR, MVFR, IFR, LIFR).</p>
+<section class="calc"><div><label for="raw">METAR text<textarea id="raw" rows="4" style="font:inherit;width:100%;padding:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px">OMDB 161000Z 31008KT 6000 HZ FEW030 SCT250 36/22 Q1002 NOSIG</textarea></label><p><button class="btn" id="dec" style="border:0;cursor:pointer">Decode</button></p>
+<label for="icao">Or fetch the latest METAR (ICAO code)<input id="icao" value="OPKC" maxlength="4"></label><p><button class="btn" id="get" style="border:0;cursor:pointer">Fetch and decode</button></p></div><div id="out" class="out" aria-live="polite"></div></section>
+<h2>How to read a METAR</h2><p>A METAR is a routine aviation weather report. Its groups always come in the same order: station, date and time (UTC), wind, visibility, weather, cloud, temperature and dew point, then pressure.</p>
+<h3>Example</h3><p><b>OMDB 161000Z 31008KT 6000 HZ FEW030 SCT250 36/22 Q1002</b>: Dubai, day 16 at 10:00 UTC, wind from 310° at 8 knots, visibility 6,000 m in haze, few clouds at 3,000 ft, scattered at 25,000 ft, temperature 36 °C, dew point 22 °C, QNH 1002 hPa.</p>
+<h3>Flight categories</h3><p>VFR: ceiling above 3,000 ft and visibility above 5 miles. MVFR: ceiling 1,000 to 3,000 ft or visibility 3 to 5 miles. IFR: ceiling 500 to 999 ft or visibility 1 to 3 miles. LIFR: ceiling below 500 ft or visibility below 1 mile. The decoder uses the lowest broken or overcast layer as the ceiling.</p>
+<h3>FAQ</h3><p><b>What does CAVOK mean?</b> Visibility 10 km or more, no significant cloud and no significant weather.</p><p><b>What is the difference between Q and A pressure groups?</b> Q is QNH in hectopascals. A is the altimeter setting in inches of mercury, used in the US and Canada.</p>
+<script>
+const $=i=>document.getElementById(i),W={MI:'shallow',BC:'patches of',PR:'partial',DR:'drifting',BL:'blowing',SH:'showers of',TS:'thunderstorm with',FZ:'freezing',DZ:'drizzle',RA:'rain',SN:'snow',SG:'snow grains',IC:'ice crystals',PL:'ice pellets',GR:'hail',GS:'small hail',UP:'unknown precipitation',BR:'mist',FG:'fog',FU:'smoke',VA:'volcanic ash',DU:'dust',SA:'sand',HZ:'haze',PY:'spray',PO:'dust whirls',SQ:'squalls',FC:'funnel cloud',SS:'sandstorm',DS:'duststorm'},CL={FEW:'few',SCT:'scattered',BKN:'broken',OVC:'overcast',VV:'vertical visibility'};
+function dec(s){const t=s.trim().toUpperCase().split(/\s+/),o=[],add=(a,b)=>o.push([a,b]);let ceil=1e9,vis=99;
+for(let i=0;i<t.length;i++){const x=t[i];let m;
+if(/^(METAR|SPECI|AUTO|COR)$/.test(x))continue;
+if(!o.length&&/^[A-Z]{4}$/.test(x)){add('Station',x);continue}
+if(m=x.match(/^(\d\d)(\d\d)(\d\d)Z$/)){add('Observed','day '+m[1]+', '+m[2]+':'+m[3]+' UTC');continue}
+if(m=x.match(/^(VRB|\d{3})(P?\d{2,3})(?:G(\d{2,3}))?(KT|MPS)$/)){add('Wind',(m[1]=='VRB'?'variable':'from '+m[1]+'°')+' at '+(+m[2].replace('P',''))+(m[3]?', gusting '+m[3]:'')+(m[4]=='KT'?' kt':' m/s'));continue}
+if(/^\d{3}V\d{3}$/.test(x)){add('Wind varying',x.replace('V','° to ')+'°');continue}
+if(x=='CAVOK'){add('Visibility and cloud','10 km or more, no significant cloud (CAVOK)');vis=10;continue}
+if(/^\d{4}$/.test(x)){const v=+x;add('Visibility',v>=9999?'10 km or more':v+' m');vis=v/1609;continue}
+if(m=x.match(/^(P?)(\d+(?:\/\d+)?)SM$/)){let n=m[2].includes('/')?m[2].split('/').reduce((a,b)=>a/b):+m[2];if(i&&/^\d+$/.test(t[i-1]))n+=+t[i-1];add('Visibility',(m[1]?'more than ':'')+n.toFixed(1)+' SM');vis=n;continue}
+if(m=x.match(/^(FEW|SCT|BKN|OVC|VV)(\d{3})(CB|TCU)?$/)){const h=m[2]*100;add('Cloud',CL[m[1]]+' at '+h+' ft'+(m[3]?(m[3]=='CB'?' (cumulonimbus)':' (towering cumulus)'):''));if(m[1]!='FEW'&&m[1]!='SCT')ceil=Math.min(ceil,h);continue}
+if(/^(SKC|CLR|NSC|NCD)$/.test(x)){add('Cloud','no significant cloud');continue}
+if(m=x.match(/^(M?\d\d)\/(M?\d\d)?$/)){const f=v=>v?+v.replace('M','-'):null;add('Temperature / dew point',f(m[1])+' °C / '+(f(m[2])===null?'n/a':f(m[2])+' °C'));continue}
+if(m=x.match(/^Q(\d{4})$/)){add('Pressure (QNH)',+m[1]+' hPa');continue}
+if(m=x.match(/^A(\d{4})$/)){add('Altimeter',(m[1]/100).toFixed(2)+' inHg');continue}
+if(/^(RMK|TEMPO|BECMG|NOSIG)$/.test(x)){add(x=='NOSIG'?'Trend':x,x=='NOSIG'?'no significant change':t.slice(i+1).join(' ')||'none');break}
+if(m=x.match(/^([-+]|VC)?((?:MI|BC|PR|DR|BL|SH|TS|FZ|DZ|RA|SN|SG|IC|PL|GR|GS|UP|BR|FG|FU|VA|DU|SA|HZ|PY|PO|SQ|FC|SS|DS)+)$/)){add('Weather',({'-':'light ','+':'heavy ',VC:'nearby '}[m[1]]||'')+m[2].match(/../g).map(c=>W[c]).join(' '));continue}
+if(/^R\d/.test(x))add('Runway visual range',x)}
+add('Flight category',ceil<500||vis<1?'LIFR':ceil<1000||vis<3?'IFR':ceil<=3000||vis<=5?'MVFR':'VFR');return o}
+function show(s){const el=$('out');el.textContent='';dec(s).forEach(([a,b])=>{const d=document.createElement('div');d.className='r';const l=document.createElement('span');l.textContent=a;const v=document.createElement('b');v.textContent=b;d.append(l,v);el.append(d)})}
+$('dec').onclick=()=>show($('raw').value);
+$('get').onclick=async()=>{const id=$('icao').value.trim().toUpperCase();try{const j=await(await fetch('/api/wx?t=metar&ids='+id)).json();if(!j.length){$('out').textContent='No recent METAR for '+id;return}$('raw').value=j[0].rawOb;show(j[0].rawOb)}catch(_){$('out').textContent='Weather service is busy. Try again shortly.'}};
+show($('raw').value)
+</script>
+</main>
+<footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>
