@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live METAR by Airport: Decoded Weather | FlightPlanPro</title><meta name="description" content="Latest METAR for any airport, decoded in plain English with flight category. Free, updated every few minutes.">
+<meta name="google-site-verification" content="JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc">
+<link rel="canonical" href="https://flightplanpro.pages.dev/metar/"><meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="Live METAR by Airport: Decoded Weather | FlightPlanPro"><meta property="og:description" content="Latest METAR for any airport, decoded in plain English with flight category. Free, updated every few minutes."><meta property="og:url" content="https://flightplanpro.pages.dev/metar/"><meta property="og:site_name" content="FlightPlanPro">
+<meta name="twitter:card" content="summary"><meta name="theme-color" content="#0f2a3d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f2a3d'/%3E%3Cpath d='M5 24 27 8' stroke='%23e0407f' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css"></head><body>
+<a class="skip" href="#m">Skip to content</a>
+<header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
+<nav aria-label="Main"><a href="/flight-planner/">Flight planner</a><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
+<main id="m" class="wrap"><nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / METAR</nav><h1>Live METAR by Airport</h1><p class="lead">Latest aviation weather observations for any airport, decoded in plain English. Updated about every five minutes.</p>
+<p><label for="ids" style="max-width:420px">Airport codes (ICAO, up to 6, separated by commas)<input id="ids" value="OPKC,OMDB,EGLL,KJFK"></label></p><p><button class="btn" id="go" style="border:0;cursor:pointer">Get latest</button></p><div id="res" aria-live="polite"></div>
+<h2>How to read a METAR</h2><p>A METAR is an observation of current airport weather. The groups run in a fixed order: station, day and time in UTC, wind, visibility, weather, cloud, temperature and dew point, then pressure. The decoder above also gives the flight category from the lowest broken or overcast layer and the visibility. For the full guide and an example, see the <a href="/tools/metar-decoder/">METAR decoder</a>.</p>
+<script src="/assets/wx.js"></script><script>
+const $=i=>document.getElementById(i);
+function row(a,b){const d=document.createElement('div');d.className='r';const l=document.createElement('span');l.textContent=a;const v=document.createElement('b');v.textContent=b;d.append(l,v);return d}
+async function run(){const o=$('res');o.textContent='Loading…';const ids=$('ids').value.toUpperCase().split(/[\s,]+/).filter(x=>/^[A-Z0-9]{3,4}$/.test(x)).slice(0,6);if(!ids.length){o.textContent='Enter 1 to 6 ICAO codes.';return}
+try{const j=await(await fetch('/api/wx?t=metar&ids='+ids.join(','))).json();o.textContent='';ids.forEach(id=>{const x=j.find(y=>y.icaoId==id),c=document.createElement('section');c.className='calc';c.style.marginBottom='16px';const l=document.createElement('div'),h=document.createElement('h2'),p=document.createElement('pre'),r=document.createElement('div');h.textContent=id;h.style.margin='0 0 8px';p.style.cssText='white-space:pre-wrap;font-size:.85rem';r.className='out';l.append(h,p);
+if(!x){p.textContent='No recent report available.'}else{p.textContent=x.rawOb;dec(x.rawOb).forEach(([a,c])=>r.append(row(a,c)))}
+c.append(l,r);o.append(c)})}catch(_){o.textContent='Weather service is busy. Try again shortly.'}}
+$('go').onclick=run;run()
+</script></main>
+<footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>

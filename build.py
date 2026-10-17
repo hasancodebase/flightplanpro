@@ -22,7 +22,7 @@ def page(path, title, desc, body, ld=None):
 <link rel="stylesheet" href="/assets/style.css">{ld}</head><body>
 <a class="skip" href="#m">Skip to content</a>
 <header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
-<nav aria-label="Main"><a href="/flight-planner/">Flight planner</a><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
+<nav aria-label="Main"><a href="/flight-planner/">Flight planner</a><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/">Tools</a><a href="/about/">About</a></nav></div></header>
 <main id="m" class="wrap">{body}</main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
 <p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
@@ -138,8 +138,8 @@ w("assets/style.css", """:root{--bg:#e8eff3;--gl:rgba(10,37,64,.05);--ink:#0a254
 body{background-image:linear-gradient(var(--gl) 1px,transparent 1px),linear-gradient(90deg,var(--gl) 1px,transparent 1px);background-size:48px 48px}
 .wrap{max-width:1040px;margin:0 auto;padding:0 20px}a{color:var(--blue)}a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--mag);outline-offset:2px}
 .skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;color:#000;padding:8px;z-index:9}
-header{background:#0a2540;border-bottom:3px solid var(--mag)}.bar{display:flex;justify-content:space-between;align-items:center;min-height:58px}
-.logo{font:700 1.35rem var(--hd);color:#fff;text-decoration:none;letter-spacing:.01em}.logo b{color:var(--sky)}nav a{margin-left:20px;color:#d7e6f2;text-decoration:none;font-weight:600}nav a:hover{color:#fff}
+header{background:#0a2540;border-bottom:3px solid var(--mag)}.bar{flex-wrap:wrap;display:flex;justify-content:space-between;align-items:center;min-height:58px}
+.logo{font:700 1.35rem var(--hd);color:#fff;text-decoration:none;letter-spacing:.01em}.logo b{color:var(--sky)}nav{display:flex;flex-wrap:wrap}nav a{margin-left:16px;color:#d7e6f2;text-decoration:none;font-weight:600}nav a:hover{color:#fff}
 h1,h2,h3{font-family:var(--hd);letter-spacing:-.005em}h1{font-size:clamp(2rem,5.2vw,3.1rem);line-height:1.08;margin:.9em 0 .4em}h2{margin:2.2em 0 .6em;font-size:1.55rem}h3{margin:1.2em 0 .2em;font-size:1.1rem}
 p,li{max-width:68ch}.lead{font-size:1.15rem;color:var(--mute)}.note{font-size:.9rem;color:var(--mute)}.crumb{font-size:.9rem;color:var(--mute);margin-top:18px}
 .btn{display:inline-block;background:var(--mag);color:#fff;padding:13px 24px;border-radius:6px;font-weight:700;text-decoration:none}.btn:hover{filter:brightness(1.1)}
@@ -177,6 +177,11 @@ urls += ["/tools/metar-decoder/", "/tools/notam-decoder/"]
 import json as _j
 w("tools/metar-decoder/index.html", page("/tools/metar-decoder/", "METAR Decoder: Read Aviation Weather Reports | FlightPlanPro", "Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English.", open("/home/claude/metar_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"METAR Decoder","url":"https://flightplanpro.pages.dev/tools/metar-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
 w("tools/notam-decoder/index.html", page("/tools/notam-decoder/", "NOTAM Decoder and Route Conflict Check | FlightPlanPro", "Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area.", open("/home/claude/notam_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"NOTAM Decoder and Route Check","url":"https://flightplanpro.pages.dev/tools/notam-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
+
+urls += ["/metar/", "/taf/"]
+w("assets/wx.js", open("/tmp/wx.js").read())
+w("metar/index.html", page("/metar/", "Live METAR by Airport: Decoded Weather | FlightPlanPro", "Latest METAR for any airport, decoded in plain English with flight category. Free, updated every few minutes.", open("/home/claude/metar_page.html").read()))
+w("taf/index.html", page("/taf/", "Live TAF Forecast by Airport: Decoded | FlightPlanPro", "Latest TAF airport forecast decoded group by group: FM, BECMG, TEMPO and PROB, with flight category.", open("/home/claude/taf_page.html").read()))
 w("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {S}/sitemap.xml\n")
 w("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{S}{u}</loc><lastmod>{D}</lastmod></url>\n" for u in urls) + "</urlset>\n")
 w("_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n/assets/*\n  Cache-Control: public, max-age=86400\n")
