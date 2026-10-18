@@ -1,4 +1,6 @@
 import os, json
+from guides_data import G
+GL='<div class="rows">'+"".join('<a class="row" href="/guides/%s/" data-a="pilot student dispatcher engineer hobbyist"><span class="n">%s</span><span class="d">%s</span><span class="t">Guide</span></a>'%(g["slug"],g["title"],g["desc"]) for g in G)+'</div>'
 S = "https://flightplanpro.pages.dev"
 GSC = "JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc"
 D = "2026-10-15"
@@ -22,7 +24,7 @@ def page(path, title, desc, body, ld=None):
 <link rel="stylesheet" href="/assets/style.css">{ld}</head><body>
 <a class="skip" href="#m">Skip to content</a>
 <header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
-<nav aria-label="Main"><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/crew-duty-limits/">Crew duty</a><a href="/tools/">All tools</a><a class="cta" href="/flight-planner/">Plan a flight</a><a href="/about/">About</a></nav></div></header>
+<nav aria-label="Main"><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/crew-duty-limits/">Crew duty</a><a href="/guides/">Guides</a><a href="/tools/">All tools</a><a class="cta" href="/flight-planner/">Plan a flight</a><a href="/about/">About</a></nav></div></header>
 <main id="m" class="wrap">{body}</main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
 <p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
@@ -129,7 +131,7 @@ w("index.html", page("/", "FlightPlanPro – Free Flight Planning Tools for Pilo
   +PROD+
   '<section class="hero"><div><h2 style="margin-top:0">Try it live: the wind triangle</h2><p class="lead">Drag the sliders to see the heading to fly, ground speed and wind correction angle update instantly.</p><p><a href="/tools/wind-triangle-calculator/">Open the full calculator</a></p></div>'+PANEL+'</section>'
   '<h2>All tools</h2>'+CHIPS+'<div class="rows">'+cards+'</div>'+FJS+
-  '<h2>Why trust the numbers</h2><div class="trio"><p><b>Formulas on the page.</b> Each calculator explains its maths so you can check it.</p><p><b>Private by design.</b> Calculators run in your browser. Nothing you type is sent anywhere.</p><p><b>Honest limits.</b> These are planning aids. Approved aircraft data, weather and NOTAMs always come first.</p></div>'
+  '<h2>Guides</h2>'+GL+'<h2>Why trust the numbers</h2><div class="trio"><p><b>Formulas on the page.</b> Each calculator explains its maths so you can check it.</p><p><b>Private by design.</b> Calculators run in your browser. Nothing you type is sent anywhere.</p><p><b>Honest limits.</b> These are planning aids. Approved aircraft data, weather and NOTAMs always come first.</p></div>'
   '<h2>FAQ</h2><h3>Are these tools free?</h3><p>Yes. Every tool is free and needs no account.</p><h3>Can I use them for real flights?</h3><p>They are training and reference aids. Use approved aircraft data, official weather and NOTAMs for operational decisions.</p>'+WJS, hl))
 
 w("about/index.html", page("/about/", "About FlightPlanPro | Free Aviation Planning Tools", "About FlightPlanPro and its disclaimer: free aviation calculators for training and planning reference.",
@@ -192,6 +194,17 @@ w("tools/crew-duty-limits/index.html", page("/tools/crew-duty-limits/", "Crew Du
 w("assets/wx.js", open("/tmp/wx.js").read())
 w("metar/index.html", page("/metar/", "Live METAR by Airport: Decoded Weather | FlightPlanPro", "Latest METAR for any airport, decoded in plain English with flight category. Free, updated every few minutes.", open("/home/claude/metar_page.html").read()))
 w("taf/index.html", page("/taf/", "Live TAF Forecast by Airport: Decoded | FlightPlanPro", "Latest TAF airport forecast decoded group by group: FM, BECMG, TEMPO and PROB, with flight category.", open("/home/claude/taf_page.html").read()))
+
+urls += ["/guides/"] + ["/guides/%s/" % g["slug"] for g in G]
+w("guides/index.html", page("/guides/", "Aviation Guides: Weather, Flight Plans and Crew Limits | FlightPlanPro", "Plain-English aviation guides: crosswind, METAR, TAF, ICAO flight plans, the wind triangle and FAA Part 117 crew limits.", '<h1>Guides</h1><p class="lead">Plain-English explanations of the calculations and rules behind the tools.</p>'+GL))
+for g in G:
+    p = "/guides/%s/" % g["slug"]
+    rel = "".join('<li><a href="/guides/%s/">%s</a></li>' % (x["slug"], x["title"]) for x in G if x is not g)
+    ld = {"@context": "https://schema.org", "@graph": [
+        {"@type": "Article", "headline": g["title"], "author": {"@type": "Organization", "name": "FlightPlanPro"}, "datePublished": "2026-10-18", "dateModified": "2026-10-18", "mainEntityOfPage": S + p},
+        {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in g["faq"]]}]}
+    body = '<nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / ' + g["title"] + '</nav><article><h1>' + g["title"] + '</h1>' + g["body"] + '<p><a class="btn" href="' + g["tool"][0] + '">Open the ' + g["tool"][1].lower() + '</a></p><h2>FAQ</h2>' + "".join("<h3>%s</h3><p>%s</p>" % qa for qa in g["faq"]) + '<h2>More guides</h2><ul class="links">' + rel + '</ul><p class="note">For training and reference only. Check official sources before any real flight.</p></article>'
+    w(p.strip("/") + "/index.html", page(p, g["title"] + " | FlightPlanPro", g["desc"], body, ld))
 w("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {S}/sitemap.xml\n")
 w("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{S}{u}</loc><lastmod>{D}</lastmod></url>\n" for u in urls) + "</urlset>\n")
 w("_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n/assets/*\n  Cache-Control: public, max-age=86400\n")
