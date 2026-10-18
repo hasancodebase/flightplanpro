@@ -10,45 +10,71 @@
 <a class="skip" href="#m">Skip to content</a>
 <header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
 <nav aria-label="Main"><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/crew-duty-limits/">Crew duty</a><a href="/tools/">All tools</a><a class="cta" href="/flight-planner/">Plan a flight</a><a href="/about/">About</a></nav></div></header>
-<main id="m" class="wrap"><style>.warn{padding:10px 14px;background:rgba(245,163,0,.15);border-left:4px solid var(--amb);margin:14px 0}.tb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;background:var(--card)}.tb th,.tb td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}.ok{color:#1e8c4a;font-weight:700}.bad{color:var(--mag);font-weight:700}</style>
+<main id="m" class="wrap"><style>.warn{padding:10px 14px;background:rgba(245,163,0,.15);border-left:4px solid var(--amb);margin:14px 0}.tb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;background:var(--card)}.tb th,.tb td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}.ok{color:#1e8c4a;font-weight:700}.bad{color:var(--mag);font-weight:700}.warnc{color:#b87a00;font-weight:700}
+.bn{padding:10px 14px;border-radius:8px;font-weight:700;margin-bottom:14px;color:#fff}.bn.ok{background:#1e8c4a;color:#fff}.bn.warn{background:#f5a300;color:#1a1a1a}.bn.bad{background:#d1126b;color:#fff}
+.ev{display:grid;grid-template-columns:52px 14px 1fr;gap:10px;align-items:start}.ic{font-size:1.25rem;text-align:center;line-height:1.2}.bw{display:flex;flex-direction:column;border-radius:7px;overflow:hidden;min-height:8px}.bw i{display:block;width:14px}.lb small{display:block;color:var(--mute)}.lg{font-size:.8rem;color:var(--mute);margin-top:12px}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px}</style>
 <nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/tools/">Tools</a> / Crew duty limits</nav>
-<h1>Crew Duty and Flight Time Limits (FAA Part 117)</h1>
-<p class="lead">Check a planned flight against 14 CFR Part 117 limits for two, three and four pilot crews, with rest facility class, flight segments and deadhead.</p>
-<div class="warn"><b>Reference only.</b> This models the Part 117 tables for acclimated crews (a 30 minute reduction applies if not acclimated). It does not model extensions, split duty, reserve, cumulative limits or your operator's approved fatigue program. Always check the regulation and your operations manual.</div>
+<h1>Crew Duty and Block Time Limits (FAA Part 117)</h1>
+<p class="lead">Enter crew pickup, report, block off and block on times in UTC. See block time, flight duty period and a colour-coded duty timeline checked against Part 117.</p>
+<div class="warn"><b>Reference only.</b> This models the Part 117 tables. It does not model extensions, split duty, reserve, cumulative limits or your operator's approved fatigue program. Always check the regulation and your operations manual.</div>
 <section class="calc"><form id="f" onsubmit="return false">
 <label>Crew complement<select id="cw"><option value="2">2 pilots (unaugmented)</option><option value="3" selected>3 pilots (augmented)</option><option value="4">4 pilots (double crew)</option></select></label>
 <label>Rest facility class (augmented)<select id="cl"><option value="1">Class 1 (bunk)</option><option value="2">Class 2</option><option value="3">Class 3 (seat)</option></select></label>
-<label>Report time, local acclimated<input id="rt" type="time" value="08:00"></label>
-<label>Flight segments<input id="sg" type="number" min="1" max="9" value="1"></label>
-<label>Planned flight time (hours, 14.5 = 14h30)<input id="ft" type="number" step="0.1" value="14"></label>
-<label>Planned FDP, report to final block-in (hours)<input id="fd" type="number" step="0.1" value="15.5"></label>
+<label>Crew van pickup, UTC (optional)<input id="pu" placeholder="HH:MM" maxlength="5" inputmode="numeric"></label>
+<label>Report at dispatch, UTC<input id="rp" placeholder="HH:MM" maxlength="5" inputmode="numeric"></label>
+<label>Leave dispatch for aircraft, UTC (optional)<input id="lv" placeholder="HH:MM" maxlength="5" inputmode="numeric"></label>
+<label>Block off, UTC<input id="bo" placeholder="HH:MM" maxlength="5" inputmode="numeric"></label>
+<label>Block on at destination, UTC<input id="bn" placeholder="HH:MM" maxlength="5" inputmode="numeric"></label>
+<label>Post-flight duty (minutes)<input id="pf" type="number" value="30"></label>
+<label>Flight segments<input id="sg" type="number" min="1" max="9"></label>
+<label>Ground time between sectors (hours)<input id="gt" type="number" step="0.1" value="0"></label>
+<label>Local time offset for rule tables (hours from UTC)<input id="tz" type="number" step="0.5" value="0"></label>
 <label>Deadhead transportation (hours, optional)<input id="dh" type="number" step="0.1" value="0"></label>
-<label style="display:flex;gap:8px;align-items:center"><input id="ac" type="checkbox" checked style="width:auto"> Crew is acclimated</label><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="calc" type="button" style="border:0;cursor:pointer;font:700 1rem system-ui">Calculate</button><button class="btn ghost" id="clr" type="button" style="cursor:pointer;font:700 1rem system-ui">Reset</button><button class="btn ghost" id="ex" type="button" style="cursor:pointer;font:700 1rem system-ui">Load example</button></div></form><div id="o" class="out" aria-live="polite"></div></section>
+<label style="display:flex;gap:8px;align-items:center"><input id="ac" type="checkbox" checked style="width:auto"> Crew is acclimated</label>
+<label style="display:flex;gap:8px;align-items:center"><input id="cp" type="checkbox" checked style="width:auto"> Duty starts at crew van pickup (operator policy)</label>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="calc" type="button" style="border:0;cursor:pointer;font:700 1rem system-ui">Calculate</button><button class="btn ghost" id="clr" type="button" style="cursor:pointer;font:700 1rem system-ui">Reset</button><button class="btn ghost" id="ex" type="button" style="cursor:pointer;font:700 1rem system-ui">Load example</button></div></form>
+<div id="o" class="out" aria-live="polite"></div></section>
 <h2>Which crew complement works?</h2><div id="tb" style="overflow-x:auto"></div>
-<h2>Rules used</h2><ul><li><b>Flight time (§117.11, Table A):</b> two pilots 8 or 9 hours by report time; 13 hours with three pilots; 17 hours with four pilots.</li><li><b>Flight duty period:</b> Table B for two pilots (by start time and segments), Table C for augmented crews (by start time, 3 or 4 pilots, and rest facility class). The longest possible is 19 hours.</li><li><b>Augmented crews (§117.17):</b> no more than three flight segments; in-flight rest of two consecutive hours in the second half of the FDP for the pilot flying the landing, and 90 minutes for the monitoring pilot.</li><li><b>Rest (§117.25):</b> at least 10 consecutive hours before a duty period, with 8 uninterrupted hours of sleep opportunity, and 30 consecutive hours free from duty in the past 168 hours.</li><li><b>Deadhead:</b> counts as duty, and before a flight it is part of the FDP, but it is not a flight segment for Table B. If deadhead exceeds the Table B FDP, rest equal to the deadhead length is required, and never less than 10 hours (§117.25(g)).</li></ul>
-<h2>ICAO and EASA</h2><p>ICAO Annex 6 requires each State to set flight and duty limits, or to approve a fatigue risk management system. It does not publish one numeric table, so there is no single ICAO calculator. EASA limits (ORO.FTL) are different from Part 117 and are not in this tool yet. Source for the FAA figures: 14 CFR Part 117 and Tables A to C, as published in the eCFR, checked October 2026.</p>
+<h2>How to read this</h2><ul><li><b>Block time</b> is block off to block on, and is the flight time counted against the limit. For several sectors, enter the ground time between them.</li><li><b>FDP</b> runs from the start of duty (report, or crew van pickup if your operator counts it) to block on at the last sector. Post-flight duty follows and counts as duty, not as FDP.</li><li><b>All times are UTC.</b> The Part 117 tables use local time at the start of duty, so enter the local offset (for example 5 for UTC+5) and the tool looks up the right row.</li><li><b>Colours:</b> green is within limits, amber is legal with under one hour of margin, red is beyond a limit. The red part of the block bar is the time flown after the FDP limit.</li></ul>
+<h2>Rules used</h2><ul><li><b>Flight time (§117.11, Table A):</b> two pilots 8 or 9 hours by start time; 13 hours with three pilots; 17 hours with four pilots.</li><li><b>Flight duty period:</b> Table B for two pilots (by start time and segments), Table C for augmented crews (by start time, 3 or 4 pilots, and rest facility class). The longest possible is 19 hours. A 30 minute reduction applies if the crew is not acclimated.</li><li><b>Augmented crews (§117.17):</b> no more than three flight segments; in-flight rest of two consecutive hours in the second half of the FDP for the pilot flying the landing, and 90 minutes for the monitoring pilot.</li><li><b>Rest (§117.25):</b> at least 10 consecutive hours before a duty period, with 8 uninterrupted hours of sleep opportunity, and 30 consecutive hours free from duty in the past 168 hours.</li><li><b>Deadhead:</b> counts as duty, and before a flight it is part of the FDP, but it is not a flight segment for Table B. If it exceeds the Table B FDP, rest equal to the deadhead length is required, and never less than 10 hours (§117.25(g)).</li></ul>
+<h2>ICAO and EASA</h2><p>ICAO Annex 6 requires each State to set flight and duty limits, or to approve a fatigue risk management system. It does not publish one numeric table. EASA limits (ORO.FTL) differ from Part 117 and are not in this tool yet. Source for the FAA figures: 14 CFR Part 117 and Tables A to C, as published in the eCFR, checked October 2026.</p>
 <script>
-const $=i=>document.getElementById(i),f=(x,d=1)=>x.toFixed(d),hm=h=>{const m=Math.round(h*60);return Math.floor(m/60)+':'+String(m%60).padStart(2,'0')};
+const $=i=>document.getElementById(i),f=(x,d=1)=>x.toFixed(d);
 const TA=[[0,299,8],[300,1199,9],[1200,1439,8]],
 TB=[[0,239,[9,9,9,9,9,9,9]],[240,299,[10,10,10,10,9,9,9]],[300,359,[12,12,12,12,11.5,11,10.5]],[360,419,[13,13,12,12,11.5,11,10.5]],[420,719,[14,14,13,13,12.5,12,11.5]],[720,779,[13,13,13,13,12.5,12,11.5]],[780,1019,[12,12,12,12,11.5,11,10.5]],[1020,1319,[12,12,11,11,10,9,9]],[1320,1379,[11,11,10,10,9,9,9]],[1380,1439,[10,10,10,9,9,9,9]]],
 TC=[[0,359,[15,17,14,15.5,13,13.5]],[360,419,[16,18.5,15,16.5,14,14.5]],[420,779,[17,19,16.5,18,15,15.5]],[780,1019,[16,18.5,15,16.5,14,14.5]],[1020,1439,[15,17,14,15.5,13,13.5]]],
 L=(T,m)=>T.find(r=>m>=r[0]&&m<=r[1])[2],
 OP=[['2 pilots',2,1],['3 pilots, Class 1 rest',3,1],['3 pilots, Class 2 rest',3,2],['3 pilots, Class 3 rest',3,3],['4 pilots, Class 1 rest',4,1],['4 pilots, Class 2 rest',4,2],['4 pilots, Class 3 rest',4,3]];
 function lim(p,c,m,sg,ac){const a=ac?0:.5;if(p==2)return{fdp:L(TB,m)[Math.min(sg,7)-1]-a,ft:L(TA,m),sg:99};return{fdp:L(TC,m)[(c-1)*2+(p==4?1:0)]-a,ft:p==3?13:17,sg:3}}
-const bad=(x,v)=>v.fd>x.fdp?'Over FDP limit':v.ft>x.ft?'Over flight time limit':v.sg>x.sg?'Over 3 segments':'';
-function go(){if(!$('rt').value||$('sg').value===''||$('ft').value===''||$('fd').value===''){$('o').textContent='Enter report time, segments, flight time and FDP, then click Calculate.';$('tb').textContent='';return}
-const[h,n]=$('rt').value.split(':').map(Number),v={m:h*60+n,rt:h+n/60,sg:+$('sg').value,ft:+$('ft').value,fd:+$('fd').value,dh:+$('dh').value||0,ac:$('ac').checked},p=+$('cw').value,c=+$('cl').value,x=lim(p,c,v.m,v.sg,v.ac),o=$('o');o.textContent='';
-const row=(a,b,k)=>{const d=document.createElement('div');d.className='r';const l=document.createElement('span');l.textContent=a;const s=document.createElement('b');s.textContent=b;if(k)s.className=k;d.append(l,s);o.append(d)},why=bad(x,v);
-row('Maximum FDP',hm(x.fdp));row('Planned FDP',hm(v.fd));row('FDP margin',(v.fdp=x.fdp-v.fd)<0?'-'+hm(-v.fdp):hm(v.fdp),v.fdp<0?'bad':'ok');
-row('Maximum flight time',hm(x.ft));row('Planned flight time',hm(v.ft));row('Flight time margin',x.ft-v.ft<0?'-'+hm(v.ft-x.ft):hm(x.ft-v.ft),x.ft<v.ft?'bad':'ok');
-if(p>2)row('Segments allowed',v.sg+' of 3 maximum',v.sg>3?'bad':'ok');
-row('FDP ends (local)',hm((v.rt+v.fd)%24));row('Earliest next report','FDP end + '+hm(Math.max(10,v.dh>0&&v.dh>lim(2,1,v.m,v.sg,v.ac).fdp?v.dh:10)));
-row('Result',why||'Within limits',why?'bad':'ok');
-$('tb').innerHTML='<table class="tb"><tr><th>Crew</th><th>Max flight time</th><th>Max FDP</th><th>Result</th></tr>'+OP.map(q=>{const y=lim(q[1],q[2],v.m,v.sg,v.ac),w=bad(y,v);return'<tr><td>'+q[0]+'</td><td>'+hm(y.ft)+'</td><td>'+hm(y.fdp)+'</td><td class="'+(w?'bad':'ok')+'">'+(w||'OK')+'</td></tr>'}).join('')+'</table>'}
+const bad=(x,v)=>v.fd>x.fdp?'Over FDP limit':v.ft>x.ft?'Over block time limit':v.sg>x.sg?'Over 3 segments':'';
+const pm=s=>{const m=String(s).trim().match(/^(\d{1,2}):?(\d{2})$/);return m&&+m[1]<24&&+m[2]<60?+m[1]*60+ +m[2]:null},
+mm=m=>(m<0?'-':'')+Math.floor(Math.abs(m)/60)+':'+String(Math.round(Math.abs(m))%60).padStart(2,'0'),
+z=t=>{const d=Math.floor(t/1440),m=((t%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+String(m%60).padStart(2,'0')+'Z'+(d?' (+'+d+'d)':'')},
+nx=(v,p)=>{while(v<p)v+=1440;return v},C={ok:'#1e8c4a',warn:'#f5a300',bad:'#d1126b'};
+function go(){const o=$('o'),tb=$('tb'),rp=pm($('rp').value),bo=pm($('bo').value),bn=pm($('bn').value),pu=$('pu').value.trim()?pm($('pu').value):undefined,lv=$('lv').value.trim()?pm($('lv').value):undefined;
+if(rp===null||bo===null||bn===null||pu===null||lv===null||$('sg').value===''){o.textContent='Enter report, block off and block on in UTC (HH:MM, 24 hour) and the number of segments, then click Calculate.';tb.textContent='';return}
+const p=+$('cw').value,c=+$('cl').value,sg=+$('sg').value,pf=+$('pf').value||0,gt=+$('gt').value||0,tz=+$('tz').value||0,dh=+$('dh').value||0,ac=$('ac').checked,cp=$('cp').checked&&pu!==undefined,
+T0=pu!==undefined?pu:rp,R=nx(rp,T0),BO0=nx(bo,R),LV=lv!==undefined?nx(lv,R):Math.max(R,BO0-30),BO=nx(bo,LV),BN=nx(bn,BO),
+DS=cp?T0:R,FDP=BN-DS,FT=BN-BO-gt*60,DE=BN+pf,loc=(((DS+tz*60)%1440)+1440)%1440,x=lim(p,c,loc,sg,ac),M=DS+x.fdp*60,fm=x.fdp*60-FDP,tm=x.ft*60-FT,why=bad(x,{fd:FDP/60,ft:FT/60,sg}),st=why?'bad':(fm<60||tm<60)?'warn':'ok',bm=BN-BO,
+H=m=>Math.max(46,Math.min(Math.round(m*.45),400)),I=(h,col)=>'<i style="height:'+h+'px;background:'+col+'"></i>',
+ev=(ic,t,tt,sub,bars)=>'<div class="ev"><span class="ic">'+ic+'</span><div class="bw">'+(bars||'')+'</div><div class="lb"><b>'+t+'</b> '+tt+'<small>'+sub+'</small></div></div>';
+let bb;if(FT>x.ft*60||sg>x.sg||M<=BO)bb=I(H(bm),C.bad);else if(M<BN){const a=Math.round(H(bm)*(M-BO)/bm);bb=I(a,C.ok)+I(H(bm)-a,C.bad)}else bb=I(H(bm),st=='warn'?C.warn:C.ok);
+let h='<div class="bn '+st+'">'+(why?'✖ '+why:st=='warn'?'⚠ Legal, but under 1 hour of margin':'✔ Within Part 117 limits')+'</div>';
+if(pu!==undefined)h+=ev('🚐','Crew van pickup',z(T0),'Transport '+mm(R-T0)+(cp?', counts as duty':', not counted as duty'),I(H(R-T0),'#8aa0b2'));
+h+=ev('🏢🕒📋','Report at dispatch',z(R),'Briefing, flight plan, weather '+mm(LV-R),I(H(LV-R),'#0b5fa5'));
+h+=ev('🚶','Leave for aircraft',z(LV),'To aircraft '+mm(BO-LV),I(H(BO-LV),'#5cc0ff'));
+h+=ev('🛫','Block off',z(BO),'Block time '+mm(bm)+(gt?', flight time '+mm(FT):'')+(M>BO&&M<BN?'. Max FDP reached at '+z(M):''),bb);
+h+=ev('🛬','Block on at destination',z(BN),'FDP ends: '+mm(FDP)+' of '+mm(x.fdp*60)+' maximum. Post-flight '+pf+' min',I(H(pf),'#8aa0b2'));
+h+=ev('✅','Duty complete',z(DE),'Earliest next report after 10 h rest: '+z(DE+Math.max(600,dh>lim(2,1,loc,sg,ac).fdp?dh*60:0)));
+h+='<p class="lg"><i style="background:'+C.ok+'"></i>within limit<i style="background:'+C.warn+'"></i>under 1 h margin<i style="background:'+C.bad+'"></i>beyond limit<i style="background:#8aa0b2"></i>transport / post-flight</p>';
+const rw=(a,b,k)=>'<div class="r"><span>'+a+'</span><b'+(k?' class="'+k+'"':'')+'>'+b+'</b></div>';
+h+=rw('Block time (block off to on)',mm(FT))+rw('Maximum block time',mm(x.ft*60))+rw('Block time margin',mm(tm),tm<0?'bad':'ok')+rw('FDP, duty start to block on',mm(FDP))+rw('Maximum FDP',mm(x.fdp*60))+rw('FDP margin',mm(fm),fm<0?'bad':'ok')+rw('Rule table row used','local '+z(loc).slice(0,4)+' (UTC'+(tz>=0?'+':'')+tz+')');
+o.innerHTML=h;
+tb.innerHTML='<table class="tb"><tr><th>Crew</th><th>Max block time</th><th>Max FDP</th><th>Result</th></tr>'+OP.map(q=>{const y=lim(q[1],q[2],loc,sg,ac),w=bad(y,{fd:FDP/60,ft:FT/60,sg});return'<tr><td>'+q[0]+'</td><td>'+mm(y.ft*60)+'</td><td>'+mm(y.fdp*60)+'</td><td class="'+(w?'bad':'ok')+'">'+(w||'OK')+'</td></tr>'}).join('')+'</table>'}
 const FS=()=>document.querySelectorAll('#f input,#f select');
-function clr(){FS().forEach(x=>{if(x.type=='checkbox')x.checked=true;else if(x.tagName=='SELECT')x.selectedIndex=0;else x.value=''});$('o').textContent='';$('tb').textContent='Enter the details and click Calculate.'}
-function ex(){$('cw').value='3';$('cl').value='1';$('rt').value='08:00';$('sg').value='1';$('ft').value='14';$('fd').value='15.5';$('dh').value='0';$('ac').checked=true;go()}
-$('f').addEventListener('input',go);$('calc').onclick=go;$('clr').onclick=clr;$('ex').onclick=ex;go()
+function clr(){FS().forEach(x=>{if(x.type=='checkbox')x.checked=true;else if(x.tagName=='SELECT')x.selectedIndex=0;else x.value=''});$('pf').value='30';$('gt').value='0';$('tz').value='0';$('dh').value='0';$('o').textContent='';$('tb').textContent='Enter the details and click Calculate.'}
+function ex(){const d={cw:'3',cl:'1',pu:'03:15',rp:'04:00',lv:'04:40',bo:'05:00',bn:'16:45',pf:'30',sg:'1',gt:'0',tz:'5',dh:'0'};for(const k in d)$(k).value=d[k];$('ac').checked=true;$('cp').checked=true;go()}
+$('f').addEventListener('input',go);$('calc').onclick=go;$('clr').onclick=clr;$('ex').onclick=ex;ex()
 </script>
 </main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
