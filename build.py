@@ -75,6 +75,13 @@ T = [
   js="const l=v.alt-v.tgt,d=l/1000*3;return "+R(("Altitude to lose","f(l)+' ft'"),("Start descent","f(d,1)+' NM before the fix'"),("Descent rate (3°)","f(v.gs*5)+' ft/min'")),
   formula="Distance (NM) = altitude to lose (in thousands of feet) × 3. Rate of descent ≈ ground speed × 5 ft/min for a 3° path. Add distance to slow down if needed.",
   faq=("What is the 3:1 rule?","Plan 3 nautical miles of track for every 1,000 ft of altitude to lose, which gives roughly a 3° descent path.")),
+dict(slug="mach-tas-calculator", name="Mach and True Airspeed Calculator", kw="Mach to TAS Calculator",
+  desc="Free Mach to true airspeed calculator. Enter Mach number and static air temperature to get TAS and the speed of sound.",
+  intro="Convert a Mach number into true airspeed using the outside static air temperature. For example, Mach 0.78 at -56.5 °C gives about 447 knots.",
+  fields=[("m","Mach number",0.78),("sat","Static air temperature (°C)",-56.5)],
+  js="if(v.sat+273.15<=0)return R([['Error','Temperature is below absolute zero']]);const a=38.967854*Math.sqrt(v.sat+273.15),t=v.m*a;return "+R(("Speed of sound","f(a)+' kt'"),("True airspeed","f(t)+' kt'"),("True airspeed (km/h)","f(t*1.852)+' km/h'")),
+  formula="Speed of sound a = 38.9679 × √T knots, where T is the static air temperature in kelvin (°C + 273.15). True airspeed = Mach number × a. Use static air temperature (SAT), not total air temperature (TAT), which is higher because of ram rise.",
+  faq=("What is the speed of sound at cruise altitude?","In standard conditions at 36,000 ft the temperature is about -56.5 °C and the speed of sound is about 573 knots, so Mach 0.78 is a true airspeed of about 447 knots.")),
 ]
 
 JS = """<script>const f=(n,d=0)=>n.toFixed(d),R=a=>a.map(x=>'<div class="r"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('');
@@ -100,12 +107,13 @@ for t in T:
 <h2>More tools</h2><ul class="links">{rel}</ul>''' + JS % t["js"]
     w(p + "index.html", page(p, f'{t["kw"]} – Free Online Tool | FlightPlanPro', t["desc"], body, ld))
 
-TAGS={'crosswind-calculator': 'pilot student', 'wind-triangle-calculator': 'student pilot hobbyist', 'fuel-planning-calculator': 'dispatcher pilot', 'density-altitude-calculator': 'pilot engineer student', 'great-circle-distance-calculator': 'dispatcher engineer hobbyist', 'top-of-descent-calculator': 'pilot student'}
+TAGS={'crosswind-calculator': 'pilot student', 'wind-triangle-calculator': 'student pilot hobbyist', 'fuel-planning-calculator': 'dispatcher pilot', 'density-altitude-calculator': 'pilot engineer student', 'great-circle-distance-calculator': 'dispatcher engineer hobbyist', 'top-of-descent-calculator': 'pilot student', 'mach-tas-calculator': 'pilot student engineer hobbyist'}
 LAB={'pilot': 'Pilots', 'student': 'Students', 'dispatcher': 'Dispatchers', 'engineer': 'Engineers', 'hobbyist': 'Hobbyists'}
 cards="".join('<a class="row" href="/tools/%s/" data-a="%s"><span class="n">%s</span><span class="d">%s.</span><span class="t">%s</span></a>'%(t["slug"],TAGS[t["slug"]],t["name"],t["desc"].split(".")[0],", ".join(LAB[k] for k in TAGS[t["slug"]].split())) for t in T)
 EXTRA='<a class="row" href="/tools/metar-decoder/" data-a="pilot student dispatcher hobbyist"><span class="n">METAR Decoder</span><span class="d">Read any METAR in plain English with flight category.</span><span class="t">Pilots, Students, Dispatchers, Hobbyists</span></a><a class="row" href="/tools/notam-decoder/" data-a="pilot dispatcher student"><span class="n">NOTAM Decoder and Route Check</span><span class="d">Decode a NOTAM, map the area and check your route.</span><span class="t">Pilots, Dispatchers, Students</span></a>'
 EXTRA+='<a class="row" href="/tools/crew-duty-limits/" data-a="pilot dispatcher student"><span class="n">Crew Duty Limits (FAA Part 117)</span><span class="d">Flight time, FDP, augmented crews and rest.</span><span class="t">Pilots, Dispatchers, Students</span></a>'
 EXTRA+='<a class="row" href="/tools/load-sheet-and-balance/" data-a="pilot dispatcher student engineer"><span class="n">Load Sheet, CG Envelope and Trim</span><span class="d">Weights, balance, envelope graph and trim.</span><span class="t">Pilots, Dispatchers, Students, Engineers</span></a>'
+EXTRA+='<a class="row" href="/tools/aviation-unit-converter/" data-a="pilot dispatcher student engineer hobbyist"><span class="n">Aviation Unit Converter</span><span class="d">Speed, distance, pressure, weight, fuel and temperature.</span><span class="t">Everyone</span></a>'
 cards+=EXTRA
 CHIPS='<div class="chips" role="group" aria-label="Filter tools by role"><button aria-pressed="true" data-f="all">All</button>'+"".join('<button aria-pressed="false" data-f="%s">%s</button>'%(k,v) for k,v in LAB.items())+'</div>'
 FJS="<script>document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chips button').forEach(x=>x.setAttribute('aria-pressed',x==b));const k=b.dataset.f;document.querySelectorAll('.row').forEach(r=>r.hidden=k!='all'&&!r.dataset.a.split(' ').includes(k))})</script>"
@@ -188,8 +196,9 @@ import json as _j
 w("tools/metar-decoder/index.html", page("/tools/metar-decoder/", "METAR Decoder: Read Aviation Weather Reports | FlightPlanPro", "Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English.", open("/home/claude/metar_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"METAR Decoder","url":"https://flightplanpro.pages.dev/tools/metar-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
 w("tools/notam-decoder/index.html", page("/tools/notam-decoder/", "NOTAM Decoder and Route Conflict Check | FlightPlanPro", "Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area.", open("/home/claude/notam_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"NOTAM Decoder and Route Check","url":"https://flightplanpro.pages.dev/tools/notam-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
 
-urls += ["/metar/", "/taf/", "/tools/crew-duty-limits/", "/tools/load-sheet-and-balance/"]
+urls += ["/metar/", "/taf/", "/tools/crew-duty-limits/", "/tools/load-sheet-and-balance/", "/tools/aviation-unit-converter/"]
 w("tools/load-sheet-and-balance/index.html", page("/tools/load-sheet-and-balance/", "Load Sheet, CG Envelope and Trim Calculator | FlightPlanPro", "Free load sheet calculator: ZFW, TOW and landing weight, CG and %MAC, envelope graph and trim setting. Enter your own aircraft data. For training.", open("/home/claude/wb_body.html").read()))
+w("tools/aviation-unit-converter/index.html", page("/tools/aviation-unit-converter/", "Aviation Unit Converter: Knots, NM, hPa, inHg, kg, lb | FlightPlanPro", "Free aviation unit converter: knots, km/h, nautical miles, hPa, inHg, kilograms, pounds, litres, gallons and temperature, with fuel density.", open("/home/claude/conv_body.html").read()))
 w("tools/crew-duty-limits/index.html", page("/tools/crew-duty-limits/", "Crew Duty and Flight Time Limits Calculator | FlightPlanPro", "Check flight time and flight duty period against FAA Part 117 for 2, 3 and 4 pilot crews, rest facility class, segments and deadhead.", open("/home/claude/crew_body.html").read()))
 w("assets/wx.js", open("/tmp/wx.js").read())
 w("metar/index.html", page("/metar/", "Live METAR by Airport: Decoded Weather | FlightPlanPro", "Latest METAR for any airport, decoded in plain English with flight category. Free, updated every few minutes.", open("/home/claude/metar_page.html").read()))
