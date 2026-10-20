@@ -6,11 +6,12 @@ for(const f of ['FIX_BASE.csv','NAV_BASE.csv','AWY_BASE.csv']){if(!fs.existsSync
 const pts={};let cyc='';const add=(id,la,lo)=>{la=parseFloat(la);lo=parseFloat(lo);if(!id||isNaN(la)||isNaN(lo))return;(pts[id]=pts[id]||[]).push([la,lo])};
 for(const r of csv(pf('FIX_BASE.csv'))){add(r.FIX_ID,r.LAT_DECIMAL,r.LONG_DECIMAL);cyc=cyc||r.EFF_DATE}
 for(const r of csv(pf('NAV_BASE.csv')))add(r.NAV_ID,r.LAT_DECIMAL,r.LONG_DECIMAL);
+const mea={};if(fs.existsSync(pf('AWY_SEG_ALT.csv'))){for(const r of csv(pf('AWY_SEG_ALT.csv'))){const m=Math.max(parseInt(r.MIN_ENROUTE_ALT)||0,parseInt(r.MIN_ENROUTE_ALT_OPPOSITE)||0);if(!r.FROM_POINT||!r.TO_POINT||!m)continue;const k=r.AWY_ID+'|'+r.FROM_POINT+'|'+r.TO_POINT;mea[k]=Math.max(mea[k]||0,m)}}
 const dd=(a,b)=>Math.hypot(a[0]-b[0],(a[1]-b[1])*Math.cos(a[0]*Math.PI/180)),aw=[];let miss=0;
-for(const r of csv(pf('AWY_BASE.csv'))){let seg=[],prev=null;const flush=()=>{if(seg.length>1)aw.push([r.AWY_ID,seg]);seg=[]};
-for(const n of(r.AIRWAY_STRING||'').trim().split(/\s+/)){const c=pts[n];if(!c){miss++;flush();prev=null;continue}let b=c[0];if(prev)b=c.reduce((m,x)=>dd(prev,x)<dd(prev,m)?x:m,c[0]);prev=b;seg.push([n,+b[0].toFixed(3),+b[1].toFixed(3)])}flush()}
+for(const r of csv(pf('AWY_BASE.csv'))){let seg=[],ms=[],prev=null,pn=null;const flush=()=>{if(seg.length>1)aw.push([r.AWY_ID,seg,ms]);seg=[];ms=[]};
+for(const n of(r.AIRWAY_STRING||'').trim().split(/\s+/)){const c=pts[n];if(!c){miss++;flush();prev=null;pn=null;continue}let b=c[0];if(prev)b=c.reduce((m,x)=>dd(prev,x)<dd(prev,m)?x:m,c[0]);prev=b;if(pn!==null)ms.push(Math.round(Math.max(mea[r.AWY_ID+'|'+pn+'|'+n]||0,mea[r.AWY_ID+'|'+n+'|'+pn]||0)/100));pn=n;seg.push([n,+b[0].toFixed(3),+b[1].toFixed(3)])}flush()}
 const pr={};function proc(file,col,k,pick){if(!fs.existsSync(pf(file)))return;for(const r of csv(pf(file))){const nm=pick((r[col]||'').split('.'));if(!nm)continue;for(const a of(r.SERVED_ARPT||'').trim().split(/\s+/)){if(!a)continue;const o=pr[a]=pr[a]||{d:[],s:[]};if(!o[k].includes(nm))o[k].push(nm)}}}
 proc('DP_BASE.csv','DP_COMPUTER_CODE','d',c=>c[0]);proc('STAR_BASE.csv','STAR_COMPUTER_CODE','s',c=>c[1]||c[0]);for(const a in pr){pr[a].d.sort();pr[a].s.sort()}
 fs.mkdirSync('data',{recursive:true});fs.writeFileSync('data/airways.json',JSON.stringify({cycle:cyc,a:aw}));fs.writeFileSync('data/procs.json',JSON.stringify(pr));
-console.log(aw.length+' airway segments written to data/airways.json ('+Math.round(fs.statSync('data/airways.json').size/1024)+' KB), cycle '+cyc+'; '+miss+' points not found');
+console.log(aw.length+' airway segments written to data/airways.json ('+Math.round(fs.statSync('data/airways.json').size/1024)+' KB), cycle '+cyc+'; '+miss+' points not found; '+Object.keys(mea).length+' altitude limits');
 console.log(Object.keys(pr).length+' airports with procedures written to data/procs.json');
