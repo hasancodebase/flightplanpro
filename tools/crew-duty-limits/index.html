@@ -51,8 +51,10 @@ const pm=s=>{const m=String(s).trim().match(/^(\d{1,2}):?(\d{2})$/);return m&&+m
 mm=m=>(m<0?'-':'')+Math.floor(Math.abs(m)/60)+':'+String(Math.round(Math.abs(m))%60).padStart(2,'0'),
 z=t=>{const d=Math.floor(t/1440),m=((t%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+String(m%60).padStart(2,'0')+'Z'+(d?' (+'+d+'d)':'')},
 nx=(v,p)=>{while(v<p)v+=1440;return v},C={ok:'#1e8c4a',warn:'#f5a300',bad:'#d1126b'};
-function go(){const o=$('o'),tb=$('tb'),rp=pm($('rp').value),bo=pm($('bo').value),bn=pm($('bn').value),pu=$('pu').value.trim()?pm($('pu').value):undefined,lv=$('lv').value.trim()?pm($('lv').value):undefined;
-if(rp===null||bo===null||bn===null||pu===null||lv===null||$('sg').value===''){o.textContent='Enter report, block off and block on in UTC (HH:MM, 24 hour) and the number of segments, then click Calculate.';tb.textContent='';return}
+const lb=k=>{const l=$(k).closest('label');return l?l.childNodes[0].textContent.trim():k};
+function go(strict){document.querySelectorAll('#f .miss').forEach(x=>x.classList.remove('miss'));const o=$('o'),tb=$('tb'),rp=pm($('rp').value),bo=pm($('bo').value),bn=pm($('bn').value),pu=$('pu').value.trim()?pm($('pu').value):undefined,lv=$('lv').value.trim()?pm($('lv').value):undefined;
+const mis=['rp','bo','bn'].filter(k=>pm($(k).value)===null).concat($('sg').value===''?['sg']:[],['pu','lv'].filter(k=>$(k).value.trim()&&pm($(k).value)===null));
+if(mis.length){tb.textContent='';if(strict){mis.forEach(k=>$(k).classList.add('miss'));o.innerHTML='<p class="err">Missing or invalid information: '+mis.map(lb).join(', ')+'. Times must be 24-hour UTC, like 04:30. Enter the data and click Calculate again.</p>';$(mis[0]).focus()}else o.textContent='Enter the details and click Calculate.';return}
 const p=+$('cw').value,c=+$('cl').value,sg=+$('sg').value,pf=+$('pf').value||0,gt=+$('gt').value||0,tz=+$('tz').value||0,dh=+$('dh').value||0,ac=$('ac').checked,cp=$('cp').checked&&pu!==undefined,
 T0=pu!==undefined?pu:rp,R=nx(rp,T0),BO0=nx(bo,R),LV=lv!==undefined?nx(lv,R):Math.max(R,BO0-30),BO=nx(bo,LV),BN=nx(bn,BO),
 DS=cp?T0:R,FDP=BN-DS,FT=BN-BO-gt*60,DE=BN+pf,loc=(((DS+tz*60)%1440)+1440)%1440,x=lim(p,c,loc,sg,ac),M=DS+x.fdp*60,fm=x.fdp*60-FDP,tm=x.ft*60-FT,why=bad(x,{fd:FDP/60,ft:FT/60,sg}),st=why?'bad':(fm<60||tm<60)?'warn':'ok',bm=BN-BO,
@@ -74,7 +76,7 @@ tb.innerHTML='<table class="tb"><tr><th>Crew</th><th>Max block time</th><th>Max 
 const FS=()=>document.querySelectorAll('#f input,#f select');
 function clr(){FS().forEach(x=>{if(x.type=='checkbox')x.checked=true;else if(x.tagName=='SELECT')x.selectedIndex=0;else x.value=''});$('pf').value='30';$('gt').value='0';$('tz').value='0';$('dh').value='0';$('o').textContent='';$('tb').textContent='Enter the details and click Calculate.'}
 function ex(){const d={cw:'3',cl:'1',pu:'03:15',rp:'04:00',lv:'04:40',bo:'05:00',bn:'16:45',pf:'30',sg:'1',gt:'0',tz:'5',dh:'0'};for(const k in d)$(k).value=d[k];$('ac').checked=true;$('cp').checked=true;go()}
-$('f').addEventListener('input',go);$('calc').onclick=go;$('clr').onclick=clr;$('ex').onclick=ex;ex()
+$('f').addEventListener('input',()=>go(false));$('calc').onclick=()=>go(true);$('clr').onclick=clr;$('ex').onclick=ex;ex()
 </script>
 <h2>Related guides</h2><ul class="links"><li><a href="/guides/faa-part-117-explained/">FAA Part 117 Explained: Flight Time, Duty Period and Rest</a></li><li><a href="/guides/easa-flight-time-limitations-basics/">EASA Flight Time Limitations: The Basics and How They Differ from FAA Part 117</a></li></ul></main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>

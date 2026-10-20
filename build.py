@@ -87,7 +87,7 @@ dict(slug="mach-tas-calculator", name="Mach and True Airspeed Calculator", kw="M
 JS = """<script>const f=(n,d=0)=>n.toFixed(d),R=a=>a.map(x=>'<div class="r"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('');
 const F=document.getElementById('f'),O=document.getElementById('o');
 function calc(v){%s}
-function c(){const v={};[...F.elements].forEach(e=>{if(e.id)v[e.id]=parseFloat(e.value)});O.innerHTML=Object.values(v).some(isNaN)?'<p>Enter every value to see results.</p>':calc(v)}
+function c(){const v={};[...F.elements].forEach(e=>{if(e.id)v[e.id]=parseFloat(e.value)});const mi=[...F.elements].filter(e=>e.id&&isNaN(parseFloat(e.value))).map(e=>e.parentElement.childNodes[0].textContent.trim());O.innerHTML=mi.length?'<p class="err">Missing information: '+mi.join(', ')+'. Enter the data to see results.</p>':calc(v)}
 F.addEventListener('input',c);c()</script>"""
 
 urls = ["/", "/tools/", "/about/"]
@@ -177,6 +177,7 @@ form{display:grid;gap:12px}label{display:grid;gap:4px;font-weight:600;font-size:
 .hero2{padding:36px 0 18px;max-width:780px}.hero2 h1{margin:0 0 .3em;font-size:clamp(2.2rem,6vw,3.6rem)}.btn+.btn{margin-left:10px}.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink);padding:11px 22px}
 .prod{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:8px 0 12px}.pc{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--mag);padding:20px;border-radius:10px;text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s}.pc:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(10,37,64,.16)}.pc svg{width:42px;height:42px;stroke:var(--blue);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.pc h3{margin:0;font-size:1.25rem}.pc p{margin:0;color:var(--mute);font-size:.95rem}.pc span{margin-top:auto;padding-top:6px;font-weight:700;color:var(--mag)}
 nav a.cta{background:var(--mag);color:#fff;padding:7px 14px;border-radius:6px}nav a.cta:hover{filter:brightness(1.1);color:#fff}
+.err{color:#c62828;font-weight:700;margin:8px 0}.miss{border-color:#c62828!important;box-shadow:0 0 0 2px rgba(198,40,40,.25)}@media(prefers-color-scheme:dark){.err{color:#ff7b7b}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}""")
 
 

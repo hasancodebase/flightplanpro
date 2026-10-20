@@ -33,9 +33,11 @@ function clr(){document.querySelectorAll('#f input,#f textarea').forEach(x=>x.va
 const pt=s=>s.trim().split(/\n+/).map(l=>l.split(/[ ,;]+/).map(Number)).filter(r=>r.length>1&&r.every(x=>!isNaN(x))).sort((a,b)=>a[0]-b[0]);
 function ip(T,x,k){const n=T.length;if(x<=T[0][0])return T[0][k];if(x>=T[n-1][0])return T[n-1][k];for(let i=1;i<n;i++)if(x<=T[i][0]){const a=T[i-1],b=T[i];return a[k]+(b[k]-a[k])*(x-a[0])/(b[0]-a[0])}}
 function go(){const o=$('o'),E=pt($('env').value),TR=pt($('trm').value),v=k=>parseFloat($(k).value);
-if(E.length<2||['mtow','mlw','mzfw','lemac','mac','ramp','taxi','trip','farm'].some(k=>isNaN(v(k)))){o.textContent='Fill in the limits, fuel and envelope table, or click Load example.';return}
+document.querySelectorAll('#f .miss').forEach(x=>x.classList.remove('miss'));
+const mis=['mtow','mlw','mzfw','lemac','mac','ramp','taxi','trip','farm'].filter(k=>isNaN(v(k))),nm=mis.map(k=>$(k).closest('label').childNodes[0].textContent.trim());if(E.length<2){mis.push('env');nm.push('CG envelope table (at least two lines)')}
+if(mis.length){mis.forEach(k=>$(k).classList.add('miss'));o.innerHTML='<p class="err">Missing or invalid information: '+nm.join(', ')+'. Enter the data and click Calculate again.</p>';return}
 let W=0,M=0,rows='',mx=1;ST.forEach((s,i)=>{const w=parseFloat($('w'+i).value),a=parseFloat($('a'+i).value);if(w>0&&!isNaN(a)){W+=w;M+=w*a;mx=Math.max(mx,w)}});
-if(W<=0){o.textContent='Enter at least one loading station.';return}
+if(W<=0){o.innerHTML='<p class="err">Missing information: at least one loading station with a weight and an arm. Enter the data and click Calculate again.</p>';return}
 const fo=v('ramp')-v('taxi'),fl=fo-v('trip'),fa=v('farm'),
 cd=(n,w,m,lim)=>{const arm=m/w,pc=(arm-v('lemac'))/v('mac')*100,fw=ip(E,w,1),af=ip(E,w,2),ov=w>lim,out=pc<fw||pc>af;return{n,w,arm,pc,fw,af,ov,out,lim,mg:Math.min(pc-fw,af-pc)}},
 Z=cd('Zero fuel',W,M,v('mzfw')),T=cd('Takeoff',W+fo,M+fo*fa,v('mtow')),A=cd('Landing',W+fl,M+fl*fa,v('mlw')),cs=[Z,T,A],
