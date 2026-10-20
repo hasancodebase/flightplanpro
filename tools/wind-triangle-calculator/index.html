@@ -18,6 +18,6 @@
 const F=document.getElementById('f'),O=document.getElementById('o');
 function calc(v){const a=(v.wd-v.crs)*Math.PI/180,s=v.ws/v.tas*Math.sin(a);if(Math.abs(s)>1)return R([['Error','Wind too strong for this airspeed']]);const k=Math.asin(s),g=v.tas*Math.cos(k)-v.ws*Math.cos(a),h=(v.crs+k*180/Math.PI+360)%360;return R([['True heading',f(h)+'°'],['Wind correction angle',f(k*180/Math.PI,1)+'° '+(k>=0?'right':'left')],['Ground speed',f(g)+' kt']])}
 function c(){const v={};[...F.elements].forEach(e=>{if(e.id)v[e.id]=parseFloat(e.value)});O.innerHTML=Object.values(v).some(isNaN)?'<p>Enter every value to see results.</p>':calc(v)}
-F.addEventListener('input',c);c()</script></main>
+F.addEventListener('input',c);c()</script><h2>Related guides</h2><ul class="links"><li><a href="/guides/wind-triangle-explained/">The Wind Triangle Explained: Heading, Ground Speed and Drift</a></li></ul></main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
-<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · <a href="/site-map/">Site map</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>

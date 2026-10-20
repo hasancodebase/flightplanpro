@@ -27,7 +27,7 @@ def page(path, title, desc, body, ld=None):
 <nav aria-label="Main"><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/crew-duty-limits/">Crew duty</a><a href="/guides/">Guides</a><a href="/tools/">All tools</a><a class="cta" href="/flight-planner/">Plan a flight</a><a href="/about/">About</a></nav></div></header>
 <main id="m" class="wrap">{body}</main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
-<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · <a href="/site-map/">Site map</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
 
 def R(*a): return "R([" + ",".join(f"['{x}',{y}]" for x, y in a) + "])"
 HM = "Math.floor(t)+' h '+f((t%1)*60)+' min'"
@@ -214,6 +214,14 @@ for g in G:
         {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in g["faq"]]}]}
     body = '<nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / ' + g["title"] + '</nav><article><h1>' + g["title"] + '</h1>' + g["body"] + '<p><a class="btn" href="' + g["tool"][0] + '">Open the ' + g["tool"][1].lower() + '</a></p><h2>FAQ</h2>' + "".join("<h3>%s</h3><p>%s</p>" % qa for qa in g["faq"]) + '<h2>More guides</h2><ul class="links">' + rel + '</ul><p class="note">For training and reference only. Check official sources before any real flight.</p></article>'
     w(p.strip("/") + "/index.html", page(p, g["title"] + " | FlightPlanPro", g["desc"], body, ld))
+
+urls.append("/site-map/")
+_mk=lambda items:'<ul class="links">'+"".join('<li><a href="%s">%s</a></li>'%i for i in items)+'</ul>'
+_main=[("/flight-planner/","Flight Planner"),("/metar/","Live METAR"),("/taf/","Live TAF"),("/tools/crew-duty-limits/","Crew duty limits"),("/tools/notam-decoder/","NOTAM decoder and route check"),("/tools/load-sheet-and-balance/","Load sheet, CG envelope and trim")]
+_calc=[("/tools/%s/"%t["slug"],t["name"]) for t in T]+[("/tools/metar-decoder/","METAR decoder"),("/tools/aviation-unit-converter/","Aviation unit converter"),("/tools/","All tools")]
+_gd=[("/guides/%s/"%g["slug"],g["title"]) for g in G]+[("/guides/","All guides")]
+_info=[("/","Home"),("/about/","About"),("/data-sources/","Data sources and disclaimer"),("/privacy/","Privacy policy")]
+w("site-map/index.html", page("/site-map/", "Site Map | FlightPlanPro", "Every page on FlightPlanPro: flight planner, weather, crew duty limits, calculators and guides.", '<h1>Site map</h1><h2>Main tools</h2>'+_mk(_main)+'<h2>Calculators</h2>'+_mk(_calc)+'<h2>Guides</h2>'+_mk(_gd)+'<h2>About the site</h2>'+_mk(_info)))
 w("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {S}/sitemap.xml\n")
 w("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{S}{u}</loc><lastmod>{D}</lastmod></url>\n" for u in urls) + "</urlset>\n")
 w("_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n/assets/*\n  Cache-Control: public, max-age=86400\n")
@@ -234,5 +242,12 @@ Static site (plain HTML/CSS/JS, no build step, no paid services).
 ## Add a tool
 Tools are defined in `build.py` (list `T`). Edit it, run `python3 build.py`, commit the output.
 """)
+
+REL={"tools/crosswind-calculator":["how-to-calculate-crosswind"],"tools/wind-triangle-calculator":["wind-triangle-explained"],"tools/fuel-planning-calculator":["flight-fuel-planning-explained"],"tools/density-altitude-calculator":["density-altitude-explained"],"tools/metar-decoder":["how-to-read-a-metar"],"metar":["how-to-read-a-metar"],"taf":["how-to-read-a-taf"],"tools/notam-decoder":["how-to-read-a-notam"],"tools/crew-duty-limits":["faa-part-117-explained","easa-flight-time-limitations-basics"],"flight-planner":["what-is-in-an-icao-flight-plan","how-to-file-a-flight-plan","flight-fuel-planning-explained"],"tools/mach-tas-calculator":["wind-triangle-explained"],"tools/great-circle-distance-calculator":["what-is-in-an-icao-flight-plan"]}
+for _p,_sl in REL.items():
+    _f=os.path.join(O,_p,"index.html");_h=open(_f,encoding="utf-8").read()
+    _b='<h2>Related guides</h2><ul class="links">'+"".join('<li><a href="/guides/%s/">%s</a></li>'%(x,next(g["title"] for g in G if g["slug"]==x)) for x in _sl)+'</ul>'
+    assert '</main>' in _h
+    open(_f,"w",encoding="utf-8").write(_h.replace('</main>',_b+'</main>',1))
 os.system(f"cp /home/claude/build.py {O}/build.py")
 print(len(urls), "pages")

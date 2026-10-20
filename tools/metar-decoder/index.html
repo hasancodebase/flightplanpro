@@ -44,6 +44,6 @@ $('dec').onclick=()=>show($('raw').value);
 $('get').onclick=async()=>{const id=$('icao').value.trim().toUpperCase();try{const j=await(await fetch('/api/wx?t=metar&ids='+id)).json();if(!j.length){$('out').textContent='No recent METAR for '+id;return}$('raw').value=j[0].rawOb;show(j[0].rawOb)}catch(_){$('out').textContent='Weather service is busy. Try again shortly.'}};
 show($('raw').value)
 </script>
-</main>
+<h2>Related guides</h2><ul class="links"><li><a href="/guides/how-to-read-a-metar/">How to Read a METAR: A Plain-English Guide</a></li></ul></main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
-<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · <a href="/site-map/">Site map</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>
