@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDTO Planner: Diversion Circles and Route Coverage | FlightPlanPro</title><meta name="description" content="Free EDTO planner: draw diversion circles around en-route alternates, find the EDTO portion of a route and check coverage for your diversion time.">
+<meta name="google-site-verification" content="JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc">
+<link rel="canonical" href="https://flightplanpro.pages.dev/tools/edto-planner/"><meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="EDTO Planner: Diversion Circles and Route Coverage | FlightPlanPro"><meta property="og:description" content="Free EDTO planner: draw diversion circles around en-route alternates, find the EDTO portion of a route and check coverage for your diversion time."><meta property="og:url" content="https://flightplanpro.pages.dev/tools/edto-planner/"><meta property="og:site_name" content="FlightPlanPro">
+<meta name="twitter:card" content="summary"><meta name="theme-color" content="#0f2a3d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f2a3d'/%3E%3Cpath d='M5 24 27 8' stroke='%23e0407f' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css"></head><body>
+<a class="skip" href="#m">Skip to content</a>
+<header><div class="wrap bar"><a class="logo" href="/">FlightPlan<b>Pro</b></a>
+<nav aria-label="Main"><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/crew-duty-limits/">Crew duty</a><a href="/guides/">Guides</a><a href="/tools/">All tools</a><a class="cta" href="/flight-planner/">Plan a flight</a><a href="/about/">About</a></nav></div></header>
+<main id="m" class="wrap"><style>.tb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;background:var(--card)}.tb th,.tb td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}.ok{color:#1e8c4a;font-weight:700}.bad{color:#c62828;font-weight:700}.warn{padding:10px 14px;background:rgba(245,163,0,.15);border-left:4px solid var(--amb);margin:14px 0}.g2{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}</style>
+<nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/tools/">Tools</a> / EDTO planner</nav>
+<h1>EDTO Planner: Diversion Circles and Route Coverage</h1>
+<p class="lead">Draw the diversion circles around your en-route alternates and check whether your route stays within the diversion time you plan to use. Learn the basics in the <a href="/guides/edto-explained/">EDTO guide</a>.</p>
+<div class="warn"><b>Training tool.</b> It measures distance only. It does not check airport status, weather, rescue and firefighting category or your approval. Real EDTO planning uses your aircraft's approved one-engine-inoperative speed and your State's rules.</div>
+<form id="f" onsubmit="return false"><div class="g2">
+<label>Departure airport (ICAO)<input id="dep" maxlength="4"></label><label>Destination airport (ICAO)<input id="dst" maxlength="4"></label>
+<label>Diversion time to use (minutes)<input id="mins" type="number" step="1"></label><label>Threshold time (minutes)<input id="thr" type="number" step="1"></label>
+<label>One-engine-inoperative cruise speed (kt TAS)<input id="spd" type="number" step="1"></label><label>Wind component on diversion (kt, + tailwind)<input id="wc" type="number" step="1"></label></div>
+<label style="margin-top:10px">En-route alternates (ICAO codes, separated by commas)<input id="alts" placeholder="For example BIKF, CYQX"></label>
+<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input id="cdd" type="checkbox" checked style="width:auto"> Count the departure and destination airports as alternates</label>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn" id="calc" type="button" style="border:0;cursor:pointer;font:700 1rem system-ui">Calculate</button><button class="btn ghost" id="clr" type="button" style="cursor:pointer;font:700 1rem system-ui">Reset</button><button class="btn ghost" id="ex" type="button" style="cursor:pointer;font:700 1rem system-ui">Load example</button></div></form>
+<div id="o" aria-live="polite" style="margin-top:16px"></div>
+<h2>How it works</h2><ul><li><b>Diversion distance</b> = (one-engine-inoperative speed + wind component) × diversion time. With no wind this is still-air distance, the basis ICAO uses for the approval.</li><li>The route is sampled every 5 NM along the great circle. At each point the tool finds the nearest alternate.</li><li>Points farther than the <b>threshold</b> distance from every alternate are the EDTO portion of the route. Points beyond the <b>diversion</b> distance are not covered, and show in red.</li></ul>
+<p>Colours: grey means within the threshold distance of an alternate, green means EDTO but covered, red means not covered by your diversion time.</p>
+<script>
+const $=i=>document.getElementById(i),r=Math.PI/180,R=3440.065;
+const hv=(a,b)=>{const p=a[0]*r,q=b[0]*r,l=(b[1]-a[1])*r,h=Math.sin((q-p)/2)**2+Math.cos(p)*Math.cos(q)*Math.sin(l/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const dp=(a,b,d)=>{const p=a[0]*r,l=a[1]*r,t=b*r,g=d/R,q=Math.asin(Math.sin(p)*Math.cos(g)+Math.cos(p)*Math.sin(g)*Math.cos(t));return[q/r,(l+Math.atan2(Math.sin(t)*Math.sin(g)*Math.cos(p),Math.cos(g)-Math.sin(p)*Math.sin(q)))/r]};
+function pts(a,b,m){const v=x=>[Math.cos(x[0]*r)*Math.cos(x[1]*r),Math.cos(x[0]*r)*Math.sin(x[1]*r),Math.sin(x[0]*r)],A=v(a),B=v(b),w=Math.acos(Math.min(1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])),o=[];for(let i=0;i<=m;i++){const t=i/m,s=w?Math.sin((1-t)*w)/Math.sin(w):1-t,u=w?Math.sin(t*w)/Math.sin(w):t,x=s*A[0]+u*B[0],y=s*A[1]+u*B[1],z=s*A[2]+u*B[2];o.push([Math.atan2(z,Math.hypot(x,y))/r,Math.atan2(y,x)/r])}return o}
+let DB;const db=()=>DB||(DB=fetch('/data/airports.json').then(x=>x.ok?x.json():null).catch(()=>null));
+const lb=k=>{const l=$(k).closest('label');return l?l.childNodes[0].textContent.trim():k},fm=(x,d=0)=>Number(x).toFixed(d),esc=s=>String(s).replace(/[<>&]/g,'');
+function calc(D,dep,dst,list,cdd,spd,wc,mins,thr){const gs=spd+wc;let al=list.slice();if(cdd)al=[dep,dst].concat(al);al=[...new Set(al)];
+const AL=al.map(c=>({c,n:D[c][1],p:[D[c][2],D[c][3]],best:1e9,at:0})),A=[D[dep][2],D[dep][3]],B=[D[dst][2],D[dst][3]],tot=hv(A,B),m=Math.max(2,Math.ceil(tot/5)),P=pts(A,B,m),rad=gs*mins/60,rth=gs*thr/60,md=[];let mx=0;
+P.forEach((p,i)=>{let b=1e9;AL.forEach(a=>{const d=hv(p,a.p);if(d<b)b=d;if(d<a.best){a.best=d;a.at=i*tot/m}});md.push(b);if(b>mx)mx=b});
+const cl=md.map(d=>d<=rth?0:d<=rad?1:2),runs=[];cl.forEach((c,i)=>{const l=runs[runs.length-1];if(l&&l.c==c)l.q.push(P[i]);else{const q=[];if(l)q.push(l.q[l.q.length-1]);q.push(P[i]);runs.push({c,q,a:i*tot/m})}});
+const edto=cl.map((c,i)=>c>0?i:-1).filter(i=>i>=0),unc=runs.filter(x=>x.c==2).map(x=>x.a);
+return{AL,A,B,tot,rad,rth,mx,gs,runs,ok:mx<=rad,e0:edto.length?edto[0]*tot/m:null,e1:edto.length?edto[edto.length-1]*tot/m:null,unc,step:tot/m}}
+function mapDraw(S){const box=$('rmap');if(!box)return;const run=()=>{try{const ring=(p,d)=>{const c=[];for(let b=0;b<=360;b+=10)c.push(dp(p,b,d));return c},rings=S.AL.map(a=>ring(a.p,S.rad)),all=[].concat(...rings),la=all.map(q=>q[0]),lo=all.map(q=>q[1]);box.textContent='';
+const m=new maplibregl.Map({container:box,style:'https://tiles.openfreemap.org/styles/liberty',bounds:[[Math.min(...lo),Math.min(...la)],[Math.max(...lo),Math.max(...la)]],fitBoundsOptions:{padding:30}});m.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+const mk=(p,t)=>{const d=document.createElement('div'),i=document.createElement('i');d.style.cssText='display:flex;align-items:center;gap:4px;font:700 12px system-ui;color:#0a2540;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap';i.style.cssText='display:block;width:10px;height:10px;border-radius:50%;background:#0a2540;border:2px solid #fff';d.append(i,document.createTextNode(t));new maplibregl.Marker({element:d,anchor:'left'}).setLngLat([p[1],p[0]]).addTo(m)};
+m.on('load',()=>{m.addSource('c',{type:'geojson',data:{type:'FeatureCollection',features:rings.map(g=>({type:'Feature',geometry:{type:'Polygon',coordinates:[g.map(q=>[q[1],q[0]])]}}))}});m.addLayer({id:'cf',type:'fill',source:'c',paint:{'fill-color':'#0b5fa5','fill-opacity':.12}});m.addLayer({id:'cl',type:'line',source:'c',paint:{'line-color':'#0b5fa5','line-width':1.5}});
+S.runs.forEach((x,i)=>{m.addSource('r'+i,{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:x.q.map(q=>[q[1],q[0]])}}});m.addLayer({id:'r'+i,type:'line',source:'r'+i,paint:{'line-color':['#5d7f9b','#1e8c4a','#d1126b'][x.c],'line-width':4}})});S.AL.forEach(a=>mk(a.p,a.c))})}catch(_){box.textContent='The map could not be drawn on this device.'}};
+if(typeof maplibregl!=='undefined')return run();const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';document.head.append(c);const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';s.onload=run;document.head.append(s)}
+async function go(){const o=$('o');document.querySelectorAll('#f .miss').forEach(x=>x.classList.remove('miss'));
+const mis=['dep','dst','mins','thr','spd','alts'].filter(k=>k=='alts'?($('alts').value.trim()===''&&!$('cdd').checked):['mins','thr','spd'].includes(k)?!(+$(k).value>0):$(k).value.trim().length<3);
+if(mis.length){mis.forEach(k=>$(k).classList.add('miss'));o.innerHTML='<p class="err">Missing or invalid information: '+mis.map(lb).join(', ')+'. Enter the data and click Calculate again.</p>';$(mis[0]).focus();return}
+const D=await db();if(!D){o.innerHTML='<p class="err">The airport file is not loaded.</p>';return}
+const dep=$('dep').value.trim().toUpperCase(),dst=$('dst').value.trim().toUpperCase(),list=$('alts').value.toUpperCase().split(/[\s,;]+/).filter(Boolean),unk=[...new Set([dep,dst].concat(list).filter(c=>!D[c]))];
+if(unk.length){o.innerHTML='<p class="err">Airport not found in the airport file: '+unk.map(esc).join(', ')+'. Check the ICAO codes.</p>';return}
+const spd=+$('spd').value,wc=+$('wc').value||0;if(spd+wc<=0){o.innerHTML='<p class="err">Speed plus wind component must be above zero. Check One-engine-inoperative cruise speed and Wind component.</p>';return}
+const mins=+$('mins').value,S=calc(D,dep,dst,list,$('cdd').checked,spd,wc,mins,+$('thr').value),rw=(a,b,k)=>'<div class="r"><span>'+a+'</span><b'+(k?' class="'+k+'"':'')+'>'+b+'</b></div>';
+S.AL.sort((x,y)=>x.at-y.at);
+o.innerHTML='<div class="calc" style="grid-template-columns:1fr"><div class="out">'+rw('Diversion distance at '+mins+' min',fm(S.rad)+' NM')+rw('Threshold distance at '+$('thr').value+' min',fm(S.rth)+' NM')+rw('Route distance',fm(S.tot)+' NM')+rw('EDTO portion of route',S.e0===null?'none: always within the threshold of an alternate':'from '+fm(S.e0)+' to '+fm(S.e1)+' NM along the route')+rw('Greatest distance from any alternate',fm(S.mx)+' NM = '+fm(S.mx/S.gs*60)+' min')+rw('Result',S.ok?'✔ Covered by '+mins+' min':'✖ Not covered by '+mins+' min: '+S.unc.length+' uncovered section'+(S.unc.length>1?'s':'')+', first at '+fm(S.unc[0])+' NM',S.ok?'ok':'bad')+'</div></div><div id="rmap" style="height:440px;margin:16px 0;background:var(--bg)"></div><table class="tb"><tr><th>Alternate</th><th>Name</th><th>Closest to route</th><th>Along route</th></tr>'+S.AL.map(a=>'<tr><td>'+esc(a.c)+'</td><td>'+esc(a.n)+'</td><td>'+fm(a.best)+' NM</td><td>'+fm(a.at)+' NM</td></tr>').join('')+'</table>';
+mapDraw(S)}
+const FS=()=>document.querySelectorAll('#f input,#f select');
+$('calc').onclick=go;$('clr').onclick=()=>{FS().forEach(x=>{if(x.type=='checkbox')x.checked=true;else x.value=''});$('thr').value='60';$('o').textContent=''};
+$('ex').onclick=()=>{const d={dep:'EINN',dst:'CYQX',mins:'120',thr:'60',spd:'400',wc:'0',alts:'BIKF, CYYT'};for(const k in d)$(k).value=d[k];$('cdd').checked=true;go()};
+$('thr').value='60'
+</script>
+<h2>Related guides</h2><ul class="links"><li><a href="/guides/edto-explained/">EDTO Explained: Extended Diversion Time Operations from Scratch</a></li><li><a href="/guides/adequate-vs-suitable-aerodrome/">Adequate vs Suitable Aerodrome: What Is the Difference?</a></li><li><a href="/guides/equal-time-point-explained/">How to Calculate an Equal Time Point (ETP)</a></li></ul></main>
+<footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data and disclaimer</a> · <a href="/privacy/">Privacy</a> · <a href="/site-map/">Site map</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>
