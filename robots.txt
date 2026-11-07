@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://flightplanpro.pages.dev/sitemap.xml
+Sitemap: https://flightplanpro.net/sitemap.xml

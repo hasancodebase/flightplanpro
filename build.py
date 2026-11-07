@@ -2,9 +2,9 @@ import os, json
 from guides_data import G
 LP='<div class="rows"><a class="row" href="/edto/" data-a="pilot student dispatcher engineer hobbyist"><span class="n">EDTO from scratch</span><span class="d">Why EDTO exists, how it is approved, how diversion circles and equal time points work, and polar routes.</span><span class="t">Learning path</span></a><a class="row" href="/oceanic/" data-a="pilot student dispatcher engineer hobbyist"><span class="n">Oceanic and North Atlantic flying</span><span class="d">Organised tracks, the TMI number, NAT high level airspace, clearances and contingencies.</span><span class="t">Learning path</span></a></div>'
 GL='<div class="rows">'+"".join('<a class="row" href="/guides/%s/" data-a="pilot student dispatcher engineer hobbyist"><span class="n">%s</span><span class="d">%s</span><span class="t">Guide</span></a>'%(g["slug"],g["title"],g["desc"]) for g in G)+'</div>'
-S = "https://flightplanpro.pages.dev"
+S = "https://flightplanpro.net"
 GSC = "JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc"
-D = "2026-10-15"
+D = "2026-11-06"
 O = "/mnt/user-data/outputs/flightplanpro"
 
 def w(p, c):
@@ -199,7 +199,7 @@ nav a.cta{background:var(--mag);color:#fff;padding:7px 14px;border-radius:6px}na
 
 
 import os as _o
-w("functions/api/wx.js", "const OK=/^[A-Z0-9]{3,4}$/;\nexport async function onRequestGet({request,waitUntil}){\nconst u=new URL(request.url),t=u.searchParams.get('t')==='taf'?'taf':'metar';\nconst ids=(u.searchParams.get('ids')||'').toUpperCase().split(',').filter(x=>OK.test(x)).slice(0,6).sort();\nif(!ids.length)return new Response('[]',{status:400,headers:{'Content-Type':'application/json'}});\nconst key=new Request(u.origin+'/api/wx?t='+t+'&ids='+ids.join(',')),c=caches.default;\nlet r=await c.match(key);\nif(!r){\nconst up=await fetch('https://aviationweather.gov/api/data/'+t+'?format=json&ids='+ids.join(',')+(t==='metar'?'&hours=3':''),{headers:{'User-Agent':'FlightPlanPro/1.0 (https://flightplanpro.pages.dev)'}});\nconst body=up.ok?((await up.text())||'[]'):'[]';\nr=new Response(body,{status:up.ok?200:502,headers:{'Content-Type':'application/json','Cache-Control':'public, max-age='+(up.ok?300:20),'Access-Control-Allow-Origin':'*'}});\nif(up.ok)waitUntil(c.put(key,r.clone()));\n}\nreturn r}\n")
+w("functions/api/wx.js", "const OK=/^[A-Z0-9]{3,4}$/;\nexport async function onRequestGet({request,waitUntil}){\nconst u=new URL(request.url),t=u.searchParams.get('t')==='taf'?'taf':'metar';\nconst ids=(u.searchParams.get('ids')||'').toUpperCase().split(',').filter(x=>OK.test(x)).slice(0,6).sort();\nif(!ids.length)return new Response('[]',{status:400,headers:{'Content-Type':'application/json'}});\nconst key=new Request(u.origin+'/api/wx?t='+t+'&ids='+ids.join(',')),c=caches.default;\nlet r=await c.match(key);\nif(!r){\nconst up=await fetch('https://aviationweather.gov/api/data/'+t+'?format=json&ids='+ids.join(',')+(t==='metar'?'&hours=3':''),{headers:{'User-Agent':'FlightPlanPro/1.0 (https://flightplanpro.net)'}});\nconst body=up.ok?((await up.text())||'[]'):'[]';\nr=new Response(body,{status:up.ok?200:502,headers:{'Content-Type':'application/json','Cache-Control':'public, max-age='+(up.ok?300:20),'Access-Control-Allow-Origin':'*'}});\nif(up.ok)waitUntil(c.put(key,r.clone()));\n}\nreturn r}\n")
 urls.append("/flight-planner/")
 w("flight-planner/index.html", page("/flight-planner/", "Flight Plan Generator: Fuel, Load Sheet, METAR/TAF | FlightPlanPro", "Free flight plan generator: route A to B with alternate C, fuel build-up, vertical flight plan, load sheet and live METAR/TAF. For training use.", open("/home/claude/fp_body.html").read()))
 
@@ -211,8 +211,8 @@ w("data-sources/index.html", page("/data-sources/", "Data Sources and Disclaimer
 
 urls += ["/tools/metar-decoder/", "/tools/notam-decoder/"]
 import json as _j
-w("tools/metar-decoder/index.html", page("/tools/metar-decoder/", "METAR Decoder: Read Aviation Weather Reports | FlightPlanPro", "Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English.", open("/home/claude/metar_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"METAR Decoder","url":"https://flightplanpro.pages.dev/tools/metar-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
-w("tools/notam-decoder/index.html", page("/tools/notam-decoder/", "NOTAM Decoder and Route Conflict Check | FlightPlanPro", "Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area.", open("/home/claude/notam_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"NOTAM Decoder and Route Check","url":"https://flightplanpro.pages.dev/tools/notam-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
+w("tools/metar-decoder/index.html", page("/tools/metar-decoder/", "METAR Decoder: Read Aviation Weather Reports | FlightPlanPro", "Free METAR decoder. Paste any METAR or fetch the latest for an airport and read wind, visibility, cloud, pressure and flight category in plain English.", open("/home/claude/metar_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"METAR Decoder","url":"https://flightplanpro.net/tools/metar-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
+w("tools/notam-decoder/index.html", page("/tools/notam-decoder/", "NOTAM Decoder and Route Conflict Check | FlightPlanPro", "Free NOTAM decoder. Paste an ICAO NOTAM, see it decoded and drawn on a map, and check whether your route crosses the restricted area.", open("/home/claude/notam_body.html").read(), _j.loads('{"@context":"https://schema.org","@type":"WebApplication","name":"NOTAM Decoder and Route Check","url":"https://flightplanpro.net/tools/notam-decoder/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}')))
 
 urls += ["/metar/", "/taf/", "/tools/crew-duty-limits/", "/tools/load-sheet-and-balance/", "/tools/aviation-unit-converter/", "/tools/edto-planner/"]
 w("tools/load-sheet-and-balance/index.html", page("/tools/load-sheet-and-balance/", "Load Sheet, CG Envelope and Trim Calculator | FlightPlanPro", "Free load sheet calculator: ZFW, TOW and landing weight, CG and %MAC, envelope graph and trim setting. Enter your own aircraft data. For training.", open("/home/claude/wb_body.html").read()))
@@ -264,7 +264,7 @@ Static site (plain HTML/CSS/JS, no build step, no paid services).
 ## Deploy
 1. Push this folder to a GitHub repo.
 2. Cloudflare dashboard > Workers & Pages > Create > Pages > Connect to Git. Project name `flightplanpro`, framework preset *None*, build command empty, output directory `/`.
-3. Site goes live at https://flightplanpro.pages.dev (if the name is free).
+3. Site goes live at https://flightplanpro.net (if the name is free).
 
 ## Google Search Console (HTML tag method)
 1. Add property > URL prefix > `{S}/` > HTML tag.

@@ -1,16 +1,18 @@
 # FlightPlanPro
 Static site (plain HTML/CSS/JS, no build step, no paid services).
 
-## Deploy
-1. Push this folder to a GitHub repo.
-2. Cloudflare dashboard > Workers & Pages > Create > Pages > Connect to Git. Project name `flightplanpro`, framework preset *None*, build command empty, output directory `/`.
-3. Site goes live at https://flightplanpro.pages.dev (if the name is free).
+## Production domain
+The production and canonical domain is https://flightplanpro.net. Cloudflare Pages also assigns the project hostname https://flightplanpro.pages.dev; configure a Cloudflare Bulk Redirect to send that hostname to the custom domain with a permanent 301 redirect, preserving paths and query strings.
 
-## Google Search Console (HTML tag method)
-1. Add property > URL prefix > `https://flightplanpro.pages.dev/` > HTML tag.
-2. Replace the placeholder in every page: `grep -rl JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc . | xargs sed -i 's/JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc/YOUR_CODE/'`
-3. Deploy, click Verify, then submit `https://flightplanpro.pages.dev/sitemap.xml`.
-(HTML file method also works: drop the `google*.html` file in the repo root.)
+## Deploy
+1. Push this folder to the GitHub repo.
+2. Cloudflare dashboard > Workers & Pages > select project `flightplanpro`; framework preset *None*, build command empty, output directory `/`.
+3. The production site is https://flightplanpro.net.
+
+## Google Search Console
+1. In the correct Google account, verify the Domain property `flightplanpro.net` (DNS TXT) or URL-prefix property `https://flightplanpro.net/`.
+2. Submit https://flightplanpro.net/sitemap.xml.
+3. For the move from `https://flightplanpro.pages.dev`, ensure a permanent redirect is active first, then use Search Console's Change of Address tool if available for the old property.
 
 ## Add a tool
 Tools are defined in `build.py` (list `T`). Edit it, run `python3 build.py`, commit the output.
