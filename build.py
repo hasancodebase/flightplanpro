@@ -4,7 +4,7 @@ LP='<div class="rows"><a class="row" href="/edto/" data-a="pilot student dispatc
 GL='<div class="rows">'+"".join('<a class="row" href="/guides/%s/" data-a="pilot student dispatcher engineer hobbyist"><span class="n">%s</span><span class="d">%s</span><span class="t">Guide</span></a>'%(g["slug"],g["title"],g["desc"]) for g in G)+'</div>'
 S = "https://flightplanpro.net"
 GSC = "JARo9iKbe9vjR2gKSiOTNG7SJquxuAxdTHmrpQ-QSsc"
-D = "2026-11-06"
+D = "2026-11-08"
 O = "/mnt/user-data/outputs/flightplanpro"
 
 def w(p, c):
@@ -28,7 +28,7 @@ def page(path, title, desc, body, ld=None):
 <nav aria-label="Main"><a href="/metar/">METAR</a><a href="/taf/">TAF</a><a href="/tools/crew-duty-limits/">Crew duty</a><a href="/guides/">Guides</a><a href="/tools/">All tools</a><a class="cta" href="/flight-planner/">Plan a flight</a><a href="/about/">About</a></nav></div></header>
 <main id="m" class="wrap">{body}</main>
 <footer><div class="wrap"><p><b>Not for operational use.</b> FlightPlanPro tools are for training and planning reference only. Always verify against your aircraft's approved manual (AFM/POH), current weather and NOTAMs, and applicable regulations.</p>
-<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data sources</a> · <a href="/disclaimer/">Safety disclaimer</a> · <a href="/privacy/">Privacy</a> · <a href="/site-map/">Site map</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
+<p><a href="/tools/">All tools</a> · <a href="/about/">About</a> · <a href="/data-sources/">Data sources</a> · <a href="/disclaimer/">Safety disclaimer</a> · <a href="/privacy/">Privacy</a> · <a href="/contact/">Contact</a> · <a href="/site-map/">Site map</a> · &copy; 2026 FlightPlanPro</p></div></footer></body></html>'''
 
 def R(*a): return "R([" + ",".join(f"['{x}',{y}]" for x, y in a) + "])"
 HM = "Math.floor(t)+' h '+f((t%1)*60)+' min'"
@@ -243,8 +243,12 @@ _mk=lambda items:'<ul class="links">'+"".join('<li><a href="%s">%s</a></li>'%i f
 _main=[("/flight-planner/","Flight Planner"),("/metar/","Live METAR"),("/taf/","Live TAF"),("/tools/crew-duty-limits/","Crew duty limits"),("/tools/notam-decoder/","NOTAM decoder and route check"),("/tools/load-sheet-and-balance/","Load sheet, CG envelope and trim"),("/edto/","EDTO learning path"),("/oceanic/","Oceanic flying learning path")]
 _calc=[("/tools/%s/"%t["slug"],t["name"]) for t in T]+[("/tools/metar-decoder/","METAR decoder"),("/tools/aviation-unit-converter/","Aviation unit converter"),("/tools/edto-planner/","EDTO planner"),("/tools/","All tools")]
 _gd=[("/guides/%s/"%g["slug"],g["title"]) for g in G]+[("/guides/","All guides")]
-_info=[("/","Home"),("/about/","About"),("/data-sources/","Data sources"),("/disclaimer/","Aviation safety disclaimer"),("/privacy/","Privacy policy")]
+_info=[("/","Home"),("/about/","About"),("/data-sources/","Data sources"),("/disclaimer/","Aviation safety disclaimer"),("/privacy/","Privacy policy"),("/contact/","Contact")]
 w("site-map/index.html", page("/site-map/", "Site Map | FlightPlanPro", "Every page on FlightPlanPro: flight planner, weather, crew duty limits, calculators and guides.", '<h1>Site map</h1><h2>Main tools</h2>'+_mk(_main)+'<h2>Calculators</h2>'+_mk(_calc)+'<h2>Guides</h2>'+_mk(_gd)+'<h2>About the site</h2>'+_mk(_info)))
+
+_contact_body='<nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / Contact</nav><h1>Contact FlightPlanPro</h1><p class="lead">FlightPlanPro is maintained by Naeem ul Hasan, a retired Flight Operations Officer based in Pakistan.</p><p>For privacy requests, corrections, feedback about a calculator or guide, or general questions about the website, email:</p><p><a class="btn" href="mailto:dev.naeemhasan@gmail.com">dev.naeemhasan@gmail.com</a></p><p>Please do not send confidential airline, crew, passenger, or live-flight information. FlightPlanPro tools are for training and planning reference only and are not an operational support channel.</p><p>For information about data use, see the <a href="/privacy/">Privacy Policy</a>. For tool limits, read the <a href="/disclaimer/">aviation safety disclaimer</a>.</p>'
+urls.append("/contact/")
+w("contact/index.html", page("/contact/", "Contact FlightPlanPro | Feedback and Privacy Requests", "Contact FlightPlanPro for privacy requests, corrections, feedback, or questions about its aviation tools and guides.", _contact_body))
 
 urls += ["/edto/", "/oceanic/"]
 _t=lambda s:next(g["title"] for g in G if g["slug"]==s)
